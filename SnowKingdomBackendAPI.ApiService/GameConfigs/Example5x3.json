@@ -1,0 +1,136 @@
+{
+  "gameName": "Frosty Fortunes 5x3",
+  "numReels": 5,
+  "numRows": 3,
+  "wildSymbol": "WILD",
+  "scatterSymbol": "SCATTER",
+  "freeSpinsAwarded": 10,
+  "betAmounts": [1, 2, 3, 5],
+  "scatterPayout": {
+    "3": 5,
+    "4": 15,
+    "5": 50
+  },
+  "symbols": {
+    "WILD": {
+      "name": "WILD",
+      "payout": {
+        "3": 20,
+        "4": 50,
+        "5": 100
+      },
+      "image": "/images/symbols/Wild.png"
+    },
+    "SCATTER": {
+      "name": "SCATTER",
+      "payout": {
+        "3": 5,
+        "4": 15,
+        "5": 50
+      },
+      "image": "/images/symbols/Scatter.png"
+    },
+    "SYMBOL1": {
+      "name": "SYMBOL1",
+      "payout": {
+        "3": 10,
+        "4": 25,
+        "5": 60
+      },
+      "image": "/images/symbols/Symbol1.png"
+    },
+    "SYMBOL2": {
+      "name": "SYMBOL2",
+      "payout": {
+        "3": 8,
+        "4": 20,
+        "5": 50
+      },
+      "image": "/images/symbols/Symbol2.png"
+    },
+    "SYMBOL3": {
+      "name": "SYMBOL3",
+      "payout": {
+        "3": 5,
+        "4": 15,
+        "5": 40
+      },
+      "image": "/images/symbols/Symbol3.png"
+    },
+    "SYMBOL4": {
+      "name": "SYMBOL4",
+      "payout": {
+        "3": 3,
+        "4": 10,
+        "5": 30
+      },
+      "image": "/images/symbols/Symbol4.png"
+    },
+    "SYMBOL5": {
+      "name": "SYMBOL5",
+      "payout": {
+        "3": 2,
+        "4": 8,
+        "5": 25
+      },
+      "image": "/images/symbols/Symbol5.png"
+    },
+    "SYMBOL6": {
+      "name": "SYMBOL6",
+      "payout": {
+        "3": 2,
+        "4": 5,
+        "5": 20
+      },
+      "image": "/images/symbols/Symbol6.png"
+    },
+    "SYMBOL7": {
+      "name": "SYMBOL7",
+      "payout": {
+        "3": 1,
+        "4": 3,
+        "5": 15
+      },
+      "image": "/images/symbols/Symbol7.png"
+    },
+    "SYMBOL8": {
+      "name": "SYMBOL8",
+      "payout": {
+        "3": 1,
+        "4": 3,
+        "5": 15
+      },
+      "image": "/images/symbols/Symbol8.png"
+    }
+  },
+  "reelStrips": [
+    [
+      "SYMBOL1", "SYMBOL2", "SYMBOL3", "SYMBOL4", "SYMBOL5",
+      "SYMBOL6", "SYMBOL7", "SYMBOL8", "WILD", "SCATTER"
+    ],
+    [
+      "SYMBOL2", "SYMBOL3", "SYMBOL4", "SYMBOL5", "SYMBOL6",
+      "SYMBOL7", "SYMBOL8", "SYMBOL1", "WILD", "SCATTER"
+    ],
+    [
+      "SYMBOL3", "SYMBOL4", "SYMBOL5", "SYMBOL6", "SYMBOL7",
+      "SYMBOL8", "SYMBOL1", "SYMBOL2", "WILD", "SCATTER"
+    ],
+    [
+      "SYMBOL4", "SYMBOL5", "SYMBOL6", "SYMBOL7", "SYMBOL8",
+      "SYMBOL1", "SYMBOL2", "SYMBOL3", "WILD", "SCATTER"
+    ],
+    [
+      "SYMBOL5", "SYMBOL6", "SYMBOL7", "SYMBOL8", "SYMBOL1",
+      "SYMBOL2", "SYMBOL3", "SYMBOL4", "WILD", "SCATTER"
+    ]
+  ],
+  "paylines": [
+    [0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1],
+    [2, 2, 2, 2, 2],
+    [0, 1, 2, 1, 0],
+    [2, 1, 0, 1, 2]
+  ]
+}
+

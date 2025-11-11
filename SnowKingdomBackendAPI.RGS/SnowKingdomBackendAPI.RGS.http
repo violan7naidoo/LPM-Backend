@@ -1,0 +1,6 @@
+@SnowKingdomBackendAPI.RGS_HostAddress = http://localhost:5047
+
+GET {{SnowKingdomBackendAPI.RGS_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
