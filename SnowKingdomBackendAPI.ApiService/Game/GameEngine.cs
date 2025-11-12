@@ -43,7 +43,21 @@ public class GameEngine
                 }
             }
             featureSymbolCount = reelsWithFeature.Count;
-            hasFeatureSymbol = featureSymbolCount >= 3; // Only expand if 3+ reels have feature symbol
+            
+            // Determine expansion threshold based on symbol type
+            // Queen, Stone, Leopard, Wolf: expand with 2+ reels
+            // Card symbols (10, J, K, Q, A) and all other symbols: expand with 3+ reels
+            int expansionThreshold;
+            if (featureSymbol == "Queen" || featureSymbol == "Stone" || featureSymbol == "Leopard" || featureSymbol == "Wolf")
+            {
+                expansionThreshold = 2; // These symbols expand with 2+ reels
+            }
+            else
+            {
+                expansionThreshold = 3; // Card symbols (10, J, K, Q, A) and all other symbols need 3+ reels
+            }
+            
+            hasFeatureSymbol = featureSymbolCount >= expansionThreshold;
             
             if (hasFeatureSymbol)
             {
@@ -343,8 +357,10 @@ public class GameEngine
 
         // 4. Feature Game: Evaluate wins after expansion (only feature symbol wins)
         // Feature symbol does NOT act as wild - it only expands
-        // Only expand if 3+ feature symbols appear on 3+ different reels (can't win with less)
-        if (isFreeSpin && !string.IsNullOrEmpty(featureSymbol) && hasFeatureSymbol && featureSymbolCount >= 3 && expandedGrid != grid)
+        // Queen, Stone, Leopard, Wolf: expand with 2+ reels
+        // All other symbols: expand with 3+ reels
+        int featureExpansionThreshold = (featureSymbol == "Queen" || featureSymbol == "Stone" || featureSymbol == "Leopard" || featureSymbol == "Wolf") ? 2 : 3;
+        if (isFreeSpin && !string.IsNullOrEmpty(featureSymbol) && hasFeatureSymbol && featureSymbolCount >= featureExpansionThreshold && expandedGrid != grid)
         {
             Console.WriteLine($"[FREE SPINS] Feature symbol expansion triggered: {featureSymbolCount} reels have {featureSymbol}");
             result.ExpandedSymbols = GetExpandedPositions(grid, expandedGrid, featureSymbol);
@@ -406,7 +422,9 @@ public class GameEngine
 
     private (decimal TotalWin, List<WinningLine> WinningLines) CalculateFeatureGameWins(List<List<string>> expandedGrid, List<List<int>> activePaylines, decimal betAmount, string featureSymbol, decimal? totalBet = null)
     {
-        // Feature game: if 3+ reels expanded, win on ALL lines as if they were consecutive
+        // Feature game: if enough reels expanded, win on ALL lines as if they were consecutive
+        // Queen, Stone, Leopard, Wolf: expand with 2+ reels
+        // All other symbols: expand with 3+ reels
         // Count how many reels are expanded (filled with feature symbol)
         var expandedReelCount = 0;
         for (int reelIndex = 0; reelIndex < expandedGrid.Count; reelIndex++)
@@ -420,8 +438,11 @@ public class GameEngine
         decimal featureWin = 0;
         var featureWinningLines = new List<WinningLine>();
 
-        // If 3+ reels expanded, pay out on ALL active paylines using the actual expanded reel count
-        if (expandedReelCount >= 3 && _config.Symbols.TryGetValue(featureSymbol, out var symbolInfo))
+        // Determine expansion threshold based on symbol type
+        int expansionThreshold = (featureSymbol == "Queen" || featureSymbol == "Stone" || featureSymbol == "Leopard" || featureSymbol == "Wolf") ? 2 : 3;
+        
+        // If enough reels expanded, pay out on ALL active paylines using the actual expanded reel count
+        if (expandedReelCount >= expansionThreshold && _config.Symbols.TryGetValue(featureSymbol, out var symbolInfo))
         {
             // Get payout for the actual expanded reel count (e.g., 3-of-a-kind, not 5-of-a-kind)
             decimal totalPayout = 0;
@@ -543,20 +564,11 @@ public class GameEngine
 
     public string SelectFeatureSymbol()
     {
-        // Select a random symbol (excluding Book symbol and low-value card symbols for better gameplay)
+        // Select a random symbol from all symbols except Scatter (9 symbols total)
         var bookSymbol = _config.BookSymbol ?? "";
         var eligibleSymbols = _config.Symbols.Keys
-            .Where(s => s != bookSymbol && 
-                       s != "A" && s != "K" && s != "Q" && s != "J" && s != "10")
+            .Where(s => s != bookSymbol) // Only exclude Scatter
             .ToList();
-
-        if (eligibleSymbols.Count == 0)
-        {
-            // Fallback to all symbols except Book
-            eligibleSymbols = _config.Symbols.Keys
-                .Where(s => s != bookSymbol)
-                .ToList();
-        }
 
         if (eligibleSymbols.Count == 0)
         {
