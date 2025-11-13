@@ -648,6 +648,7 @@ public class GameEngine
     public List<List<string>> GenerateGrid()
     {
         var grid = new List<List<string>>();
+        var scatterSymbol = _config.GetScatterSymbol();
 
         for (int reelIndex = 0; reelIndex < _config.NumReels; reelIndex++)
         {
@@ -659,6 +660,23 @@ public class GameEngine
             {
                 var symbolIndex = (finalStopIndex + rowIndex) % strip.Count;
                 var symbolName = strip[symbolIndex];
+                
+                // Prevent consecutive scatter symbols on the same reel
+                // If previous symbol was scatter and current is also scatter, skip to next symbol
+                if (rowIndex > 0 && reel[rowIndex - 1] == scatterSymbol && symbolName == scatterSymbol)
+                {
+                    // Find next non-scatter symbol in the strip
+                    int attempts = 0;
+                    int nextIndex = (symbolIndex + 1) % strip.Count;
+                    while (strip[nextIndex] == scatterSymbol && attempts < strip.Count)
+                    {
+                        nextIndex = (nextIndex + 1) % strip.Count;
+                        attempts++;
+                    }
+                    // Use the next non-scatter symbol (or scatter if entire strip is scatters, which shouldn't happen)
+                    symbolName = strip[nextIndex];
+                }
+                
                 reel.Add(symbolName);
             }
 

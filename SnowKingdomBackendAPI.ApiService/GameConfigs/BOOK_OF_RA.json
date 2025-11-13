@@ -476,34 +476,34 @@
   },
   "reelStrips": [
     [
-      "A", "K", "Q", "J", "10", "A", "K", "Q", "J", "10",
-      "A", "K", "Q", "J", "10", "A", "K", "Q", "J", "10",
-      "A", "K", "Leopard", "Wolf", "Leopard", "Wolf", "Leopard", "Wolf",
-      "Stone", "Queen", "Stone", "Queen", "Scatter", "Scatter"
+      "Stone", "Scatter", "K", "Queen", "Scatter", "Scatter", "J", "Leopard", "A", "Q",
+      "Wolf", "K", "10", "Stone", "A", "J", "Queen", "K", "Leopard", "Q",
+      "10", "Wolf", "A", "J", "K", "Leopard", "Q", "10", "Q", "A",
+      "Wolf", "K", "J", "Queen"
     ],
     [
-      "K", "Q", "J", "10", "A", "K", "Q", "J", "10", "A",
-      "K", "Q", "J", "10", "A", "K", "Q", "J", "10", "A",
-      "K", "Q", "Leopard", "Wolf", "Leopard", "Wolf", "Leopard", "Wolf",
-      "Stone", "Queen", "Stone", "Queen", "Scatter", "Scatter"
+      "K", "Stone", "Q", "Scatter", "Leopard", "J", "K", "10", "Queen", "Wolf",
+      "K", "Q", "J", "Stone", "K", "10", "Scatter", "Leopard", "Q", "K", "Q",
+      "Wolf", "J", "Q", "10", "A", "A", "Queen", "Leopard", "K", "J",
+      "Wolf", "10", "Queen", "Scatter"
     ],
     [
-      "Q", "J", "10", "A", "K", "Q", "J", "10", "A", "K",
-      "Q", "J", "10", "A", "K", "Q", "J", "10", "A", "K",
-      "Q", "J", "Leopard", "Wolf", "Leopard", "Wolf", "Leopard", "Wolf",
-      "Stone", "Queen", "Stone", "Queen", "Scatter", "Scatter"
+      "Q", "A", "Leopard", "J", "Scatter", "10", "Q", "Stone", "Wolf", "J",
+      "A", "Q", "10", "Queen", "J", "Leopard", "Q", "Scatter", "J", "A",
+      "Wolf", "Q", "10", "Stone", "J", "K", "Leopard", "Q", "Queen", "J",
+      "Wolf", "10", "A", "Scatter"
     ],
     [
-      "J", "10", "A", "K", "Q", "J", "10", "A", "K", "Q",
-      "J", "10", "A", "K", "Q", "J", "10", "A", "K", "Q",
-      "J", "10", "Leopard", "Wolf", "Leopard", "Wolf", "Leopard", "Wolf",
-      "Stone", "Queen", "Stone", "Queen", "Scatter", "Scatter"
+      "J", "10", "Stone", "A", "K", "Leopard", "J", "Scatter", "10", "Wolf",
+      "J", "A", "10", "Queen", "K", "J", "Leopard", "10", "Scatter", "J",
+      "Stone", "10", "A", "Wolf", "J", "K", "10", "Leopard", "J", "Q",
+      "Queen", "10", "A", "Scatter"
     ],
     [
-      "10", "A", "K", "Q", "J", "10", "A", "K", "Q", "J",
-      "10", "A", "K", "Q", "J", "10", "A", "K", "Q", "J",
-      "10", "A", "Leopard", "Wolf", "Leopard", "Wolf", "Leopard", "Wolf",
-      "Stone", "Queen", "Stone", "Queen", "Scatter", "Scatter"
+      "10", "A", "K", "Stone", "Scatter", "Leopard", "10", "J", "A", "Wolf",
+      "10", "K", "Q", "Queen", "10", "J", "Leopard", "Scatter", "10", "K",
+      "Wolf", "10", "Q", "Stone", "J", "10", "A", "Leopard", "K", "10",
+      "Queen", "J", "Q", "Scatter"
     ]
   ],
   "paylines": [
