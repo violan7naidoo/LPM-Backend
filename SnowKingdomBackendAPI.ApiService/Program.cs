@@ -211,6 +211,8 @@ app.MapPost("/play", async (PlayRequest request, GameConfigService configService
         var newBalance = currentState.Balance;
         var newFreeSpins = currentState.FreeSpinsRemaining;
         var newActionGameSpins = currentState.ActionGameSpins;
+        var wasInFreeSpinsMode = currentState.FreeSpinsRemaining > 0;
+        var accumulatedActionWin = currentState.AccumulatedActionGameWin;
 
         if (isActionGameSpin)
         {
@@ -230,18 +232,40 @@ app.MapPost("/play", async (PlayRequest request, GameConfigService configService
         }
 
         // Add winnings
-        // Base game wins (excluding feature symbol wins in free spins)
-        newBalance += spinResult.TotalWin;
-        Console.WriteLine($"[WIN CALCULATION] Base game win: R{spinResult.TotalWin}");
+        // IMPORTANT: In free spins, payouts happen in this order:
+        // 1. Base game wins (all symbols EXCEPT feature symbol wins that will expand)
+        // 2. Feature game wins (after expansion, feature symbol wins on all paylines)
+        // 3. Action game wins (accumulated during free spins, paid after free spins complete)
         
-        // Feature game wins (only in free spins when 3+ reels expand)
+        // Base game wins (excluding feature symbol wins in free spins that will expand)
+        // During free spins, don't add ActionGameWin to balance - accumulate it instead
+        var baseWin = spinResult.TotalWin;
+        if (isFreeSpin && spinResult.ActionGameTriggered)
+        {
+            // During free spins: accumulate action game win, don't add to balance
+            accumulatedActionWin += spinResult.ActionGameWin;
+            baseWin -= spinResult.ActionGameWin; // Remove from base win since we're accumulating it
+            Console.WriteLine($"[ACTION GAME] Accumulating win during free spins: R{spinResult.ActionGameWin}, Total accumulated: R{accumulatedActionWin}");
+        }
+        else if (!isFreeSpin && !isActionGameSpin && spinResult.ActionGameTriggered)
+        {
+            // Base game: add action game win to balance immediately (no free spins to wait for)
+            baseWin += spinResult.ActionGameWin;
+        }
+        
+        // STEP 1: Add base game wins FIRST (before expansion)
+        newBalance += baseWin;
+        Console.WriteLine($"[WIN CALCULATION] Base game win: R{baseWin}");
+        
+        // STEP 2: Add feature game wins AFTER expansion (only in free spins when reels expand)
         if (spinResult.ExpandedWin > 0)
         {
             newBalance += spinResult.ExpandedWin;
-            Console.WriteLine($"[WIN CALCULATION] Feature game win: R{spinResult.ExpandedWin}");
+            Console.WriteLine($"[WIN CALCULATION] Feature game win (after expansion): R{spinResult.ExpandedWin}");
         }
         
-        Console.WriteLine($"[WIN CALCULATION] Total win: R{spinResult.TotalWin + spinResult.ExpandedWin}");
+        var totalWin = baseWin + spinResult.ExpandedWin;
+        Console.WriteLine($"[WIN CALCULATION] Total win: R{totalWin} (Base: R{baseWin}, Expanded: R{spinResult.ExpandedWin})");
 
         // Add free spins if triggered
         // Can trigger in base game OR retrigger during free spins (if feature symbol is NOT scatter)
@@ -279,7 +303,8 @@ app.MapPost("/play", async (PlayRequest request, GameConfigService configService
             LastWin = spinResult.TotalWin + spinResult.ExpandedWin,
             Results = spinResult,
             ActionGameSpins = newActionGameSpins,
-            FeatureSymbol = finalFeatureSymbol
+            FeatureSymbol = finalFeatureSymbol,
+            AccumulatedActionGameWin = accumulatedActionWin
         };
         
         // Update spinResult with the final feature symbol
@@ -439,11 +464,20 @@ app.MapPost("/action-game/spin", async (ActionGameSpinRequest request, GameConfi
         // Spin the wheel
         var wheelResult = gameEngine.SpinActionGameWheel();
 
-        // Update balance if won
-        var newBalance = currentState.Balance + wheelResult.Win;
+        // Add wheel win to balance immediately after each spin
+        // Use session.Balance (from database) instead of currentState.Balance (from cache) to ensure we have the latest balance
+        var currentBalance = session.Balance;
+        var newBalance = currentBalance + wheelResult.Win;
+        Console.WriteLine($"[ACTION GAME] Current balance: R{currentBalance}, Wheel win: R{wheelResult.Win}, New balance: R{newBalance}");
 
         // Update action game spins (deduct 1, add any additional spins)
         var newActionGameSpins = currentState.ActionGameSpins - 1 + wheelResult.AdditionalSpins;
+
+        // Load accumulated win from database session (LastResponse) to ensure we have the latest value
+        // This is critical for accumulating wins across multiple action game sessions
+        var currentAccumulatedWin = session.LastResponse?.AccumulatedActionGameWin ?? 0;
+        var accumulatedWin = currentAccumulatedWin + wheelResult.Win;
+        Console.WriteLine($"[ACTION GAME] Current accumulated win: R{currentAccumulatedWin}, Wheel win: R{wheelResult.Win}, New accumulated win: R{accumulatedWin}");
 
         // Update session state
         var newState = new GameState
@@ -453,17 +487,28 @@ app.MapPost("/action-game/spin", async (ActionGameSpinRequest request, GameConfi
             LastWin = wheelResult.Win,
             Results = currentState.Results,
             ActionGameSpins = newActionGameSpins,
-            FeatureSymbol = currentState.FeatureSymbol
+            FeatureSymbol = currentState.FeatureSymbol,
+            AccumulatedActionGameWin = accumulatedWin
         };
 
+        // Update session state (this updates both in-memory cache and database)
         sessionService.UpdateSession(request.SessionId, newState);
+        
+        // Verify the update by checking the session balance
+        var updatedSession = await sessionService.GetSessionAsync(request.SessionId);
+        Console.WriteLine($"[ACTION GAME] After update - Session balance: R{updatedSession?.Balance}, Expected: R{newBalance}");
 
         var response = new ActionGameSpinResponse
         {
             SessionId = request.SessionId,
             Result = wheelResult,
-            RemainingSpins = newActionGameSpins
+            RemainingSpins = newActionGameSpins,
+            AccumulatedWin = accumulatedWin,
+            TotalActionSpins = currentState.ActionGameSpins,
+            Balance = newBalance // Use the calculated newBalance, not from session
         };
+        
+        Console.WriteLine($"[ACTION GAME] Response balance: R{response.Balance}");
 
         // Attempt to send to RGS (non-blocking, fire-and-forget)
         if (optionalRgsService != null)

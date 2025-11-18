@@ -50,7 +50,10 @@ public class GameDataService
             }
 
             // Update session properties
+            // Explicitly mark Balance as modified to ensure it's always updated in the database
             sessionEntity.Balance = session.Balance;
+            _context.Entry(sessionEntity).Property(e => e.Balance).IsModified = true;
+            
             sessionEntity.FreeSpinsRemaining = session.FreeSpinsRemaining;
             sessionEntity.LastWin = session.LastWin;
             sessionEntity.FreeSpinsTotalWin = session.FreeSpinsTotalWin;

@@ -30,11 +30,15 @@ public class GameEngine
         // In free spins: evaluate base game first, then feature game after expansion
         var expandedGrid = grid;
         var hasFeatureSymbol = false;
+        // Store feature symbol info for later expansion check
         var featureSymbolCount = 0;
+        HashSet<int>? reelsWithFeature = null;
+        int expansionThreshold = 3; // Default threshold
+        
         if (isFreeSpin && !string.IsNullOrEmpty(featureSymbol))
         {
-            // Count how many reels contain the feature symbol
-            var reelsWithFeature = new HashSet<int>();
+            // Count how many reels contain the feature symbol (but don't expand yet)
+            reelsWithFeature = new HashSet<int>();
             for (int reelIndex = 0; reelIndex < grid.Count; reelIndex++)
             {
                 if (grid[reelIndex].Contains(featureSymbol))
@@ -47,7 +51,6 @@ public class GameEngine
             // Determine expansion threshold based on symbol type
             // Queen, Stone, Leopard, Wolf: expand with 2+ reels
             // Card symbols (10, J, K, Q, A) and all other symbols: expand with 3+ reels
-            int expansionThreshold;
             if (featureSymbol == "Queen" || featureSymbol == "Stone" || featureSymbol == "Leopard" || featureSymbol == "Wolf")
             {
                 expansionThreshold = 2; // These symbols expand with 2+ reels
@@ -57,12 +60,7 @@ public class GameEngine
                 expansionThreshold = 3; // Card symbols (10, J, K, Q, A) and all other symbols need 3+ reels
             }
             
-            hasFeatureSymbol = featureSymbolCount >= expansionThreshold;
-            
-            if (hasFeatureSymbol)
-            {
-                expandedGrid = ExpandFeatureSymbol(grid, featureSymbol, reelsWithFeature);
-            }
+            // Don't expand yet - we'll do that after base game wins are calculated
             result.FeatureSymbol = featureSymbol;
         }
 
@@ -156,15 +154,14 @@ public class GameEngine
             Console.WriteLine($"[PAYLINE DEBUG] Payline {paylineIndex}: Count={count}, WinningSymbol={winningSymbol}");
 
             // Check for a win based on the count and the determined winning symbol
-            // In free spins base game: exclude feature symbol wins (they'll be in feature game)
-            // Note: Some symbols (Leopard, Wolf, Stone, Queen) can win with 2+ symbols
+            // In free spins: ALWAYS pay base game wins first, including feature symbol wins
+            // Feature symbol wins will be paid in base game if they don't meet expansion threshold
+            // If they meet expansion threshold, they'll be paid again in feature game after expansion
             if (count >= 2 && _config.Symbols.TryGetValue(winningSymbol, out var symbolInfo))
             {
-                // Skip feature symbol wins in base game (they'll be calculated in feature game)
-                if (isFreeSpin && !string.IsNullOrEmpty(featureSymbol) && winningSymbol == featureSymbol)
-                {
-                    continue; // Skip this win, it will be in feature game
-                }
+                // In free spins: pay ALL wins in base game first, including feature symbol wins
+                // We'll handle expansion and feature game wins AFTER base game evaluation
+                // This ensures base game pays out first, then expansion happens, then feature game pays
 
                 // Get payout from bet-specific configuration
                 decimal totalPayout = 0;
@@ -355,18 +352,21 @@ public class GameEngine
         // 3. Check for Action Game Triggers
         CheckActionGameTriggers(grid, betAmount, result);
 
-        // 4. Feature Game: Evaluate wins after expansion (only feature symbol wins)
+        // 3. AFTER base game wins are calculated, check if feature symbol should expand
         // Feature symbol does NOT act as wild - it only expands
         // Queen, Stone, Leopard, Wolf: expand with 2+ reels
         // All other symbols: expand with 3+ reels
-        int featureExpansionThreshold = (featureSymbol == "Queen" || featureSymbol == "Stone" || featureSymbol == "Leopard" || featureSymbol == "Wolf") ? 2 : 3;
-        if (isFreeSpin && !string.IsNullOrEmpty(featureSymbol) && hasFeatureSymbol && featureSymbolCount >= featureExpansionThreshold && expandedGrid != grid)
+        if (isFreeSpin && !string.IsNullOrEmpty(featureSymbol) && reelsWithFeature != null && featureSymbolCount >= expansionThreshold)
         {
+            // Now expand the reels (AFTER base game wins have been calculated)
+            expandedGrid = ExpandFeatureSymbol(grid, featureSymbol, reelsWithFeature);
+            hasFeatureSymbol = true;
+            
             Console.WriteLine($"[FREE SPINS] Feature symbol expansion triggered: {featureSymbolCount} reels have {featureSymbol}");
             result.ExpandedSymbols = GetExpandedPositions(grid, expandedGrid, featureSymbol);
             Console.WriteLine($"[FREE SPINS] Expanded symbols count: {result.ExpandedSymbols.Count}");
             
-            // Calculate feature game wins: if 3+ reels expanded, win on ALL lines
+            // Calculate feature game wins: if enough reels expanded, win on ALL lines
             // Pass totalBet for bet-specific payout lookup (bet keys are total bet amounts, not per-payline)
             var featureGameResult = CalculateFeatureGameWins(expandedGrid, activePaylines, betAmount, featureSymbol, totalBet);
             result.ExpandedWin = featureGameResult.TotalWin;
@@ -375,7 +375,7 @@ public class GameEngine
         }
         else if (isFreeSpin && !string.IsNullOrEmpty(featureSymbol))
         {
-            Console.WriteLine($"[FREE SPINS] No expansion: hasFeatureSymbol={hasFeatureSymbol}, featureSymbolCount={featureSymbolCount}, expandedGrid==grid={expandedGrid == grid}");
+            Console.WriteLine($"[FREE SPINS] No expansion: featureSymbolCount={featureSymbolCount}, expansionThreshold={expansionThreshold}");
         }
 
         return result;
@@ -409,14 +409,19 @@ public class GameEngine
         {
             for (int rowIndex = 0; rowIndex < originalGrid[reelIndex].Count; rowIndex++)
             {
-                if (originalGrid[reelIndex][rowIndex] != featureSymbol && 
-                    expandedGrid[reelIndex][rowIndex] == featureSymbol)
+                var originalSymbol = originalGrid[reelIndex][rowIndex];
+                var expandedSymbol = expandedGrid[reelIndex][rowIndex];
+                
+                // Only include positions that changed from non-feature symbol to feature symbol
+                if (originalSymbol != featureSymbol && expandedSymbol == featureSymbol)
                 {
                     expandedPositions.Add(new ExpandedSymbolPosition { Reel = reelIndex, Row = rowIndex });
+                    Console.WriteLine($"[EXPANDED POSITIONS] Added: Reel {reelIndex}, Row {rowIndex} ({originalSymbol} → {expandedSymbol})");
                 }
             }
         }
 
+        Console.WriteLine($"[EXPANDED POSITIONS] Total expanded positions: {expandedPositions.Count}");
         return expandedPositions;
     }
 

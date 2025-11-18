@@ -99,6 +99,7 @@ public class GameState
     // Book of Ra specific fields
     public int ActionGameSpins { get; set; } = 0;
     public string FeatureSymbol { get; set; } = string.Empty;
+    public decimal AccumulatedActionGameWin { get; set; } = 0;
 }
 
 public class PlayResponse
@@ -123,6 +124,9 @@ public class ActionGameSpinResponse
     public string SessionId { get; set; } = string.Empty;
     public ActionGameResult Result { get; set; } = new();
     public int RemainingSpins { get; set; }
+    public decimal AccumulatedWin { get; set; } = 0;
+    public int TotalActionSpins { get; set; } = 0;
+    public decimal Balance { get; set; } = 0;
 }
 
 public static class GameConstants

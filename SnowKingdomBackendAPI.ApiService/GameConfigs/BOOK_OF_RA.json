@@ -332,10 +332,18 @@
         }
       },
       "actionGamesByBet": {
+        "1.00": {
+          "2": 5
+        },
+        "2.00": {
+          "2": 5
+        },
         "3.00": {
+          "2": 5,
           "5": 2
         },
         "5.00": {
+          "2": 5,
           "5": 8
         }
       },
@@ -409,6 +417,11 @@
           "5": 70.00
         }
       },
+      "actionGames": {
+        "5.00": {
+          "5": 3
+        }
+      },
       "image": "/images/symbols/Q.png"
     },
     "J": {
@@ -438,6 +451,11 @@
           "3": 5.00,
           "4": 25.00,
           "5": 70.00
+        }
+      },
+      "actionGames": {
+        "5.00": {
+          "5": 3
         }
       },
       "image": "/images/symbols/J.png"
@@ -471,39 +489,44 @@
           "5": 70.00
         }
       },
+      "actionGames": {
+        "5.00": {
+          "5": 3
+        }
+      },
       "image": "/images/symbols/10.png"
     }
   },
   "reelStrips": [
     [
-      "Stone", "Scatter", "K", "Queen", "Scatter", "Scatter", "J", "Leopard", "A", "Q",
-      "Wolf", "K", "10", "Stone", "A", "J", "Queen", "K", "Leopard", "Q",
+      "Stone", "K", "Queen", "A", "K", "J", "Leopard", "A", "Q", "Wolf",
+      "K", "10", "Scatter", "Stone", "A", "J", "Queen", "K", "Leopard", "Q",
       "10", "Wolf", "A", "J", "K", "Leopard", "Q", "10", "Q", "A",
-      "Wolf", "K", "J", "Queen"
+      "Wolf", "K", "J", "Queen", "Scatter", "Stone"
     ],
     [
-      "K", "Stone", "Q", "Scatter", "Leopard", "J", "K", "10", "Queen", "Wolf",
-      "K", "Q", "J", "Stone", "K", "10", "Scatter", "Leopard", "Q", "K", "Q",
-      "Wolf", "J", "Q", "10", "A", "A", "Queen", "Leopard", "K", "J",
-      "Wolf", "10", "Queen", "Scatter"
+      "K", "Stone", "Q", "Leopard", "J", "K", "10", "Queen", "Wolf", "K",
+      "Q", "J", "Scatter", "Stone", "K", "10", "Q", "Leopard", "Q", "K",
+      "Q", "Wolf", "J", "Q", "10", "A", "A", "Queen", "Leopard", "K",
+      "J", "Wolf", "10", "Queen", "10", "Scatter"
     ],
     [
-      "Q", "A", "Leopard", "J", "Scatter", "10", "Q", "Stone", "Wolf", "J",
-      "A", "Q", "10", "Queen", "J", "Leopard", "Q", "Scatter", "J", "A",
+      "Q", "A", "Leopard", "J", "10", "Q", "Stone", "Wolf", "J", "A",
+      "Q", "10", "Scatter", "Queen", "J", "Leopard", "Q", "J", "J", "A",
       "Wolf", "Q", "10", "Stone", "J", "K", "Leopard", "Q", "Queen", "J",
-      "Wolf", "10", "A", "Scatter"
+      "Wolf", "10", "A", "A", "Scatter", "K"
     ],
     [
-      "J", "10", "Stone", "A", "K", "Leopard", "J", "Scatter", "10", "Wolf",
-      "J", "A", "10", "Queen", "K", "J", "Leopard", "10", "Scatter", "J",
-      "Stone", "10", "A", "Wolf", "J", "K", "10", "Leopard", "J", "Q",
-      "Queen", "10", "A", "Scatter"
+      "J", "10", "Stone", "A", "K", "Leopard", "J", "10", "Wolf", "J",
+      "A", "10", "Scatter", "Queen", "K", "J", "Leopard", "10", "K", "J",
+      "Stone", "10", "A", "Wolf", "J", "K", "Leopard", "J", "Q", "Queen",
+      "10", "A", "Q", "Scatter", "K", "Stone"
     ],
     [
-      "10", "A", "K", "Stone", "Scatter", "Leopard", "10", "J", "A", "Wolf",
-      "10", "K", "Q", "Queen", "10", "J", "Leopard", "Scatter", "10", "K",
-      "Wolf", "10", "Q", "Stone", "J", "10", "A", "Leopard", "K", "10",
-      "Queen", "J", "Q", "Scatter"
+      "10", "A", "K", "Stone", "Leopard", "10", "J", "A", "Wolf", "10",
+      "K", "Q", "Scatter", "Queen", "10", "J", "Leopard", "J", "10", "K",
+      "Wolf", "10", "Q", "Stone", "J", "10", "A", "Leopard", "K", "Queen",
+      "J", "Q", "10", "Scatter", "K", "A"
     ]
   ],
   "paylines": [
@@ -513,10 +536,9 @@
     [0, 1, 2, 1, 0],
     [2, 1, 0, 1, 2]
   ],
-  "actionGameTriggers": {},
   "actionGameWheel": {
-    "0": 50,
-    "R10": 40,
-    "6spins": 10
+    "6spins": 1,
+    "0": 3,
+    "R10": 8
   }
 }
