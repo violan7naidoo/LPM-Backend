@@ -149,8 +149,62 @@
       },
       "image": "/images/symbols/Coin.png"
     },
-    "Crystal": {
-      "name": "Crystal",
+    "Crown": {
+      "name": "Crown",
+      "payout": {
+        "3": 10,
+        "4": 25,
+        "5": 60
+      },
+      "payoutByBet": {
+        "1.00": {
+          "2": 2.00,
+          "3": 20.00,
+          "4": 70.00,
+          "5": 70.00
+        },
+        "2.00": {
+          "2": 4.00,
+          "3": 40.00,
+          "4": 70.00,
+          "5": 70.00
+        },
+        "3.00": {
+          "2": 6.00,
+          "3": 60.00,
+          "4": 70.00,
+          "5": 70.00
+        },
+        "5.00": {
+          "2": 10.00,
+          "3": 70.00,
+          "4": 70.00,
+          "5": 70.00
+        }
+      },
+      "actionGamesByBet": {
+        "1.00": {
+          "4": 13,
+          "5": 93
+        },
+        "2.00": {
+          "4": 33,
+          "5": 193
+        },
+        "3.00": {
+          "4": 53,
+          "5": 293
+        },
+        "5.00": {
+          "3": 3,
+          "4": 93,
+          "5": 493
+        }
+      },
+      "image": "/images/symbols/Crown.png"
+    },
+    "Crystals": {
+      "name": "Crystals",
       "payout": {
         "3": 8,
         "4": 20,
@@ -380,8 +434,8 @@
       },
       "image": "/images/symbols/Orb.png"
     },
-    "1": {
-      "name": "1",
+    "Ring": {
+      "name": "Ring",
       "payout": {
         "3": 2,
         "4": 5,
@@ -390,34 +444,37 @@
       "payoutByBet": {
         "1.00": {
           "3": 1.00,
-          "4": 5.00,
-          "5": 20.00
+          "4": 8.00,
+          "5": 30.00
         },
         "2.00": {
           "3": 2.00,
-          "4": 10.00,
-          "5": 40.00
+          "4": 16.00,
+          "5": 60.00
         },
         "3.00": {
           "3": 3.00,
-          "4": 15.00,
-          "5": 60.00
+          "4": 24.00,
+          "5": 70.00
         },
         "5.00": {
           "3": 5.00,
-          "4": 25.00,
+          "4": 40.00,
           "5": 70.00
         }
       },
       "actionGamesByBet": {
+        "3.00": {
+          "5": 2
+        },
         "5.00": {
-          "5": 3
+          "5": 8
         }
       },
-      "image": "/images/symbols/1.png"
+      "image": "/images/symbols/Ring.png"
     },
-    "2": {
-      "name": "2",
+    "Bottle": {
+      "name": "Bottle",
       "payout": {
         "3": 2,
         "4": 5,
@@ -426,99 +483,66 @@
       "payoutByBet": {
         "1.00": {
           "3": 1.00,
-          "4": 5.00,
-          "5": 20.00
+          "4": 8.00,
+          "5": 30.00
         },
         "2.00": {
           "3": 2.00,
-          "4": 10.00,
-          "5": 40.00
+          "4": 16.00,
+          "5": 60.00
         },
         "3.00": {
           "3": 3.00,
-          "4": 15.00,
-          "5": 60.00
+          "4": 24.00,
+          "5": 70.00
         },
         "5.00": {
           "3": 5.00,
-          "4": 25.00,
+          "4": 40.00,
           "5": 70.00
         }
       },
       "actionGamesByBet": {
-        "5.00": {
-          "5": 3
-        }
-      },
-      "image": "/images/symbols/2.png"
-    },
-    "3": {
-      "name": "3",
-      "payout": {
-        "3": 2,
-        "4": 5,
-        "5": 20
-      },
-      "payoutByBet": {
-        "1.00": {
-          "3": 1.00,
-          "4": 5.00,
-          "5": 20.00
-        },
-        "2.00": {
-          "3": 2.00,
-          "4": 10.00,
-          "5": 40.00
-        },
         "3.00": {
-          "3": 3.00,
-          "4": 15.00,
-          "5": 60.00
+          "5": 2
         },
         "5.00": {
-          "3": 5.00,
-          "4": 25.00,
-          "5": 70.00
+          "5": 8
         }
       },
-      "actionGamesByBet": {
-        "5.00": {
-          "5": 3
-        }
-      },
-      "image": "/images/symbols/3.png"
+      "image": "/images/symbols/Bottle.png"
     }
   },
   "reelStrips": [
     [
-      "Crystal", "Orb", "Coin", "Feather", "Orb", "1", "Dagger", "Feather", "2", "Dragon",
-      "Orb", "3", "Scatter", "Crystal", "Feather", "1", "Coin", "Orb", "Dagger", "2",
-      "3", "Dragon", "Feather", "1", "Orb", "Dagger", "2", "3", "2", "Feather",
-      "Dragon", "Orb", "1", "Coin", "Scatter", "Crystal"
+      "Crystals", "Orb", "Coin", "Feather", "Orb", "Bottle", "Dagger", "Feather", "Ring", "Dragon",
+      "Orb", "Crown", "Scatter", "Crystals", "Feather", "Bottle", "Coin", "Orb", "Dagger", "Ring",
+      "Crown", "Dragon", "Feather", "Bottle", "Orb", "Dagger", "Ring", "Crown", "Ring", "Feather",
+      "Dragon", "Orb", "Bottle", "Coin", "Scatter", "Crystals"
     ],
     [
-      "Orb", "Crystal", "2", "Dagger", "1", "Orb", "3", "Coin", "Dragon", "Orb",
-      "2", "1", "Scatter", "Crystal", "Orb", "3", "2", "Dagger", "2", "Orb",
-      "2", "Dragon", "1", "2", "3", "Feather", "Feather", "Coin", "Dagger", "Orb",
-      "1", "Dragon", "3", "Coin", "3", "Scatter"
+      "Orb", "Crystals", "Ring", "Dagger", "Bottle", "Orb", "Crown", "Coin", "Dragon", "Orb",
+      "Ring", "Bottle", "Scatter", "Crystals", "Orb", "Crown", "Ring", "Dagger", "Ring", "Orb",
+      "Ring", "Dragon", "Bottle", "Ring", "Crown", "Feather", "Feather", "Coin", "Dagger", "Orb",
+      "Bottle", "Dragon", "Crown", "Coin", "Crown", "Scatter"
     ],
     [
-      "2", "Feather", "Dagger", "1", "3", "2", "Crystal", "Dragon", "1", "Feather",
-      "2", "3", "Scatter", "Coin", "1", "Dagger", "2", "1", "1", "Feather",
-      "Dragon", "2", "3", "Crystal", "1", "Orb", "Dagger", "2", "Coin", "1",
-      "Dragon", "3", "Feather", "Feather", "Scatter", "Orb"
+      "Ring", "Feather", "Dagger", "Bottle", "Crown", "Ring", "Crystals", "Dragon", "Bottle", "Feather",
+      "Ring", "Crown", "Scatter", "Coin", "Bottle", "Dagger", "Ring", "Bottle", "Bottle", "Feather",
+      "Dragon", "Ring", "Crown", "Crystals", "Bottle", "Orb", "Dagger", "Ring", "Coin", "Bottle",
+      "Dragon", "Crown", "Feather", "Feather", "Scatter", "Orb"
     ],
     [
-      "1", "3", "Crystal", "Feather", "Orb", "Dagger", "1", "3", "Dragon", "1",
-      "Feather", "3", "Scatter", "Coin", "Orb", "1", "Dagger", "3", "Orb", "1",
-      "Crystal", "3", "Feather", "Dragon", "1", "Orb", "Dagger", "1", "2", "Coin",
-      "3", "Feather", "2", "Scatter", "Orb", "Crystal"
+      "Bottle", "Crown", "Crystals", "Feather", "Orb", "Dagger", "Bottle", "Crown", "Dragon", "Bottle",
+      "Feather", "Crown", "Scatter", "Coin", "Orb", "Bottle", "Dagger", "Crown", "Orb", "Bottle",
+      "Crystals", "Crown", "Feather", "Dragon", "Bottle", "Orb", "Dagger", "Bottle", "Ring", "Coin",
+      "Crown", "Feather", "Ring", "Scatter", "Orb", "Crystals"
     ],
     [
-      "3", "Feather", "Orb", "Crystal", "Dagger", "3", "1", "Feather", "Dragon", "3",
-      "Orb", "2", "Scatter", "Coin", "3", "1", "Dagger", "1", "3", "Orb",
-      "Dragon", "3", "2", "Crystal", "1", "3", "Feather", "Dagger", "Orb", "Coin",
-      "1", "2", "3", "Scatter", "Orb", "Feather"
+      "Crown", "Feather", "Orb", "Crystals", "Dagger", "Crown", "Bottle", "Feather", "Dragon", "Crown",
+      "Orb", "Ring", "Scatter", "Coin", "Crown", "Bottle", "Dagger", "Bottle", "Crown", "Orb",
+      "Dragon", "Crown", "Ring", "Crystals", "Bottle", "Crown", "Feather", "Dagger", "Orb", "Coin",
+      "Bottle", "Ring", "Crown", "Scatter", "Orb", "Feather"
     ]
   ],
   "paylines": [
@@ -534,3 +558,4 @@
     "R10": 8
   }
 }
+

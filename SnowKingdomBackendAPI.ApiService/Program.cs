@@ -59,12 +59,16 @@ builder.Services.AddCors(options =>
                 "http://localhost:3003", // frontEndDamian (Inferno-Empress)
                 "http://localhost:3004", // FrontEndRicky (Reign Of Thunder)
                 "http://localhost:3005", // FrontEndBookOfRa
+                "http://localhost:3006", // FrontEndInfernoEmpress
+                "http://localhost:3007", // FrontEndReignOfThunder
                 "https://localhost:3000",
                 "https://localhost:3001",
                 "https://localhost:3002",
                 "https://localhost:3003",
                 "https://localhost:3004",
                 "https://localhost:3005",
+                "https://localhost:3006",
+                "https://localhost:3007",
                 "http://localhost:9003",
                 "https://localhost:9003",
                 "http://localhost:5073",
@@ -79,6 +83,8 @@ builder.Services.AddCors(options =>
                 "http://127.0.0.1:3003",
                 "http://127.0.0.1:3004",
                 "http://127.0.0.1:3005",
+                "http://127.0.0.1:3006",
+                "http://127.0.0.1:3007",
                 "http://127.0.0.1:9003",
                 "http://127.0.0.1:5073",
                 "http://127.0.0.1:59775",
