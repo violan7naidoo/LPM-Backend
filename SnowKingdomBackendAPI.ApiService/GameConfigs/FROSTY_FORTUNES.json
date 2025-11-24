@@ -1,216 +1,271 @@
 {
-  "gameName": "SnowKingdom",
-  "numReels": 6,
-  "numRows": 4,
-  "wildSymbol": "WILD",
-  "scatterSymbol": "SCATTER",
+  "gameName": "Frosty Fortunes",
+  "numReels": 5,
+  "numRows": 3,
+  "bookSymbol": "Scatter",
+  "maxPaylines": 5,
   "freeSpinsAwarded": 10,
-  "betAmounts": [1, 2, 3, 5],
+  "betAmounts": [1.00, 2.00, 3.00, 5.00],
   "scatterPayout": {
     "3": 5,
-    "4": 20,
-    "5": 50,
-    "6": 50
+    "4": 15,
+    "5": 50
+  },
+  "scatterPayoutByBet": {
+    "1.00": { "3": 2.00, "4": 20.00, "5": 70.00 },
+    "2.00": { "3": 4.00, "4": 40.00, "5": 70.00 },
+    "3.00": { "3": 6.00, "4": 60.00, "5": 70.00 },
+    "5.00": { "3": 10.00, "4": 70.00, "5": 70.00 }
+  },
+  "scatterActionGamesByBet": {
+    "1.00": { "5": 13 },
+    "2.00": { "5": 33 },
+    "3.00": { "5": 53 },
+    "5.00": { "4": 3, "5": 93 }
   },
   "symbols": {
-    "WILD": {
-      "name": "WILD",
-      "payout": {
-        "3": 100,
-        "4": 300,
-        "5": 1000,
-        "6": 3000
+    "Scatter": {
+      "name": "Scatter",
+      "image": "/images/symbols/Scatter.png",
+      "payout": { "3": 20, "4": 50, "5": 100 },
+      "payoutByBet": {
+        "1.00": { "3": 2.00, "4": 20.00, "5": 70.00 },
+        "2.00": { "3": 4.00, "4": 40.00, "5": 70.00 },
+        "3.00": { "3": 6.00, "4": 60.00, "5": 70.00 },
+        "5.00": { "3": 10.00, "4": 70.00, "5": 70.00 }
       },
-      "image": "/images/symbols/Wild.png"
+      "actionGamesByBet": {
+        "1.00": { "5": 13 },
+        "2.00": { "5": 33 },
+        "3.00": { "5": 53 },
+        "5.00": { "4": 3, "5": 93 }
+      }
     },
-    "SCATTER": {
-      "name": "SCATTER",
-      "payout": {
-        "3": 5,
-        "4": 10,
-        "5": 250,
-        "6": 500
+    "Queen": {
+      "name": "Queen",
+      "image": "/images/symbols/Queen.png",
+      "payout": { "3": 10, "4": 25, "5": 60 },
+      "payoutByBet": {
+        "1.00": { "2": 2.00, "3": 20.00, "4": 70.00, "5": 70.00 },
+        "2.00": { "2": 4.00, "3": 40.00, "4": 70.00, "5": 70.00 },
+        "3.00": { "2": 6.00, "3": 60.00, "4": 70.00, "5": 70.00 },
+        "5.00": { "2": 10.00, "3": 70.00, "4": 70.00, "5": 70.00 }
       },
-      "image": "/images/symbols/Scatter.png"
+      "actionGamesByBet": {
+        "1.00": { "4": 13, "5": 93 },
+        "2.00": { "4": 33, "5": 193 },
+        "3.00": { "4": 53, "5": 293 },
+        "5.00": { "3": 3, "4": 93, "5": 493 }
+      }
     },
-    "CROWN": {
-      "name": "CROWN",
-      "payout": {
-        "3": 40,
-        "4": 100,
-        "5": 250,
-        "6": 800
+    "Stone": {
+      "name": "Stone",
+      "image": "/images/symbols/Stone.png",
+      "payout": { "3": 8, "4": 20, "5": 50 },
+      "payoutByBet": {
+        "1.00": { "2": 1.00, "3": 8.00, "4": 70.00, "5": 70.00 },
+        "2.00": { "2": 2.00, "3": 16.00, "4": 70.00, "5": 70.00 },
+        "3.00": { "2": 3.00, "3": 24.00, "4": 70.00, "5": 70.00 },
+        "5.00": { "2": 5.00, "3": 40.00, "4": 70.00, "5": 70.00 }
       },
-      "image": "/images/symbols/Crown.png"
+      "actionGamesByBet": {
+        "1.00": { "4": 1, "5": 33 },
+        "2.00": { "4": 9, "5": 73 },
+        "3.00": { "4": 17, "5": 113 },
+        "5.00": { "4": 33, "5": 193 }
+      }
     },
-    "DRAGON": {
-      "name": "DRAGON",
-      "payout": {
-        "3": 20,
-        "4": 40,
-        "5": 200,
-        "6": 400
+    "Leopard": {
+      "name": "Leopard",
+      "image": "/images/symbols/Leopard.png",
+      "payout": { "3": 5, "4": 15, "5": 40 },
+      "payoutByBet": {
+        "1.00": { "2": 1.00, "3": 6.00, "4": 20.00, "5": 70.00 },
+        "2.00": { "2": 2.00, "3": 12.00, "4": 40.00, "5": 70.00 },
+        "3.00": { "2": 3.00, "3": 18.00, "4": 60.00, "5": 70.00 },
+        "5.00": { "2": 5.00, "3": 30.00, "4": 70.00, "5": 70.00 }
       },
-      "image": "/images/symbols/Dragon.png"
+      "actionGamesByBet": {
+        "1.00": { "5": 8 },
+        "2.00": { "5": 23 },
+        "3.00": { "5": 38 },
+        "5.00": { "4": 3, "5": 68 }
+      }
     },
-    "LEOPARD": {
-      "name": "LEOPARD",
-      "payout": {
-        "3": 20,
-        "4": 40,
-        "5": 200,
-        "6": 400
+    "Wolf": {
+      "name": "Wolf",
+      "image": "/images/symbols/Wolf.png",
+      "payout": { "3": 5, "4": 15, "5": 40 },
+      "payoutByBet": {
+        "1.00": { "2": 1.00, "3": 6.00, "4": 20.00, "5": 70.00 },
+        "2.00": { "2": 2.00, "3": 12.00, "4": 40.00, "5": 70.00 },
+        "3.00": { "2": 3.00, "3": 18.00, "4": 60.00, "5": 70.00 },
+        "5.00": { "2": 5.00, "3": 30.00, "4": 70.00, "5": 70.00 }
       },
-      "image": "/images/symbols/Leopard.png"
+      "actionGamesByBet": {
+        "1.00": { "5": 8 },
+        "2.00": { "5": 23 },
+        "3.00": { "5": 38 },
+        "5.00": { "4": 3, "5": 68 }
+      }
     },
-    "QUEEN": {
-      "name": "QUEEN",
-      "payout": {
-        "3": 10,
-        "4": 20,
-        "5": 70,
-        "6": 140
+    "A": {
+      "name": "A",
+      "image": "/images/symbols/A.png",
+      "payout": { "3": 2, "4": 5, "5": 20 },
+      "payoutByBet": {
+        "1.00": { "3": 1.00, "4": 8.00, "5": 30.00 },
+        "2.00": { "3": 2.00, "4": 16.00, "5": 60.00 },
+        "3.00": { "3": 3.00, "4": 24.00, "5": 70.00 },
+        "5.00": { "3": 5.00, "4": 40.00, "5": 70.00 }
       },
-      "image": "/images/symbols/Queen.png"
+      "actionGamesByBet": {
+        "1.00": { "2": 5 },
+        "2.00": { "2": 5 },
+        "3.00": { "2": 5, "5": 2 },
+        "5.00": { "2": 5, "5": 8 }
+      }
     },
-    "STONE": {
-      "name": "STONE",
-      "payout": {
-        "3": 5,
-        "4": 20,
-        "5": 60,
-        "6": 100
+    "K": {
+      "name": "K",
+      "image": "/images/symbols/K.png",
+      "payout": { "3": 2, "4": 5, "5": 20 },
+      "payoutByBet": {
+        "1.00": { "3": 1.00, "4": 8.00, "5": 30.00 },
+        "2.00": { "3": 2.00, "4": 16.00, "5": 60.00 },
+        "3.00": { "3": 3.00, "4": 24.00, "5": 70.00 },
+        "5.00": { "3": 5.00, "4": 40.00, "5": 70.00 }
       },
-      "image": "/images/symbols/Stone.png"
+      "actionGamesByBet": {
+        "3.00": { "5": 2 },
+        "5.00": { "5": 8 }
+      }
     },
-    "WOLF": {
-      "name": "WOLF",
-      "payout": {
-        "3": 5,
-        "4": 20,
-        "5": 60,
-        "6": 100
+    "Q": {
+      "name": "Q",
+      "image": "/images/symbols/Q.png",
+      "payout": { "3": 2, "4": 5, "5": 20 },
+      "payoutByBet": {
+        "1.00": { "3": 1.00, "4": 5.00, "5": 20.00 },
+        "2.00": { "3": 2.00, "4": 10.00, "5": 40.00 },
+        "3.00": { "3": 3.00, "4": 15.00, "5": 60.00 },
+        "5.00": { "3": 5.00, "4": 25.00, "5": 70.00 }
       },
-      "image": "/images/symbols/Wolf.png"
+      "actionGames": {
+        "5.00": { "5": 3 }
+      }
     },
-    "ACE": {
-      "name": "ACE",
-      "payout": {
-        "3": 2,
-        "4": 5,
-        "5": 20,
-        "6": 40
+    "J": {
+      "name": "J",
+      "image": "/images/symbols/J.png",
+      "payout": { "3": 2, "4": 5, "5": 20 },
+      "payoutByBet": {
+        "1.00": { "3": 1.00, "4": 5.00, "5": 20.00 },
+        "2.00": { "3": 2.00, "4": 10.00, "5": 40.00 },
+        "3.00": { "3": 3.00, "4": 15.00, "5": 60.00 },
+        "5.00": { "3": 5.00, "4": 25.00, "5": 70.00 }
       },
-      "image": "/images/symbols/A.png"
+      "actionGames": {
+        "5.00": { "5": 3 }
+      }
     },
-    "JACK": {
-      "name": "JACK",
-      "payout": {
-        "3": 2,
-        "4": 5,
-        "5": 20,
-        "6": 40
+    "10": {
+      "name": "10",
+      "image": "/images/symbols/10.png",
+      "payout": { "3": 2, "4": 5, "5": 20 },
+      "payoutByBet": {
+        "1.00": { "3": 1.00, "4": 5.00, "5": 20.00 },
+        "2.00": { "3": 2.00, "4": 10.00, "5": 40.00 },
+        "3.00": { "3": 3.00, "4": 15.00, "5": 60.00 },
+        "5.00": { "3": 5.00, "4": 25.00, "5": 70.00 }
       },
-      "image": "/images/symbols/J.png"
-    },
-    "QUEEN_CARD": {
-      "name": "QUEEN_CARD",
-      "payout": {
-        "3": 2,
-        "4": 5,
-        "5": 20,
-        "6": 40
-      },
-      "image": "/images/symbols/Q.png"
-    },
-    "KING": {
-      "name": "KING",
-      "payout": {
-        "3": 2,
-        "4": 5,
-        "5": 20,
-        "6": 40
-      },
-      "image": "/images/symbols/K.png"
-    },
-    "TEN": {
-      "name": "TEN",
-      "payout": {
-        "3": 2,
-        "4": 5,
-        "5": 20,
-        "6": 40
-      },
-      "image": "/images/symbols/10.png"
+      "actionGames": {
+        "5.00": { "5": 3 }
+      }
     }
   },
   "reelStrips": [
-    [
-      "KING", "CROWN", "QUEEN_CARD", "TEN", "ACE",
-      "WOLF", "STONE", "QUEEN_CARD", "TEN", "JACK",
-      "QUEEN_CARD", "KING", "ACE", "LEOPARD", "DRAGON",
-      "JACK", "TEN", "JACK", "QUEEN_CARD", "KING",
-      "ACE", "WOLF", "STONE", "TEN", "JACK",
-      "QUEEN_CARD", "KING", "ACE", "WILD", "TEN",
-      "JACK", "QUEEN_CARD", "KING", "SCATTER"
-    ],
-    [
-      "TEN", "STONE", "QUEEN", "KING", "ACE",
-      "WOLF", "STONE", "QUEEN_CARD", "TEN", "JACK",
-      "QUEEN_CARD", "KING", "ACE", "LEOPARD", "DRAGON",
-      "CROWN", "TEN", "JACK", "QUEEN_CARD", "KING",
-      "ACE", "WOLF", "JACK", "TEN", "JACK",
-      "QUEEN_CARD", "KING", "ACE", "WILD", "TEN",
-      "JACK", "QUEEN_CARD", "KING", "SCATTER"
-    ],
-    [
-      "WILD", "ACE", "WOLF", "STONE", "ACE",
-      "QUEEN_CARD", "STONE", "QUEEN", "TEN", "JACK",
-      "QUEEN_CARD", "KING", "ACE", "LEOPARD", "DRAGON",
-      "CROWN", "TEN", "JACK", "QUEEN_CARD", "KING",
-      "ACE", "WOLF", "KING", "TEN", "JACK",
-      "QUEEN_CARD", "KING", "JACK", "WILD", "TEN",
-      "JACK", "QUEEN_CARD", "KING", "SCATTER"
-    ],
-    [
-      "TEN", "JACK", "QUEEN_CARD", "KING", "ACE",
-      "WOLF", "STONE", "QUEEN", "TEN", "JACK",
-      "QUEEN_CARD", "KING", "ACE", "LEOPARD", "DRAGON",
-      "CROWN", "TEN", "JACK", "QUEEN_CARD", "KING",
-      "ACE", "WOLF", "STONE", "TEN", "JACK",
-      "QUEEN_CARD", "KING", "ACE", "WILD", "TEN",
-      "JACK", "QUEEN_CARD", "KING", "SCATTER"
-    ],
-    [
-      "DRAGON", "WILD", "LEOPARD", "JACK", "ACE",
-      "WOLF", "STONE", "QUEEN", "TEN", "JACK",
-      "QUEEN_CARD", "KING", "ACE", "LEOPARD", "TEN",
-      "CROWN", "TEN", "JACK", "QUEEN_CARD", "KING",
-      "ACE", "WOLF", "STONE", "TEN", "JACK",
-      "QUEEN_CARD", "KING", "ACE", "KING", "TEN",
-      "JACK", "QUEEN_CARD", "KING", "SCATTER"
-    ],
-    [
-      "JACK", "SCATTER", "KING", "QUEEN_CARD", "ACE",
-      "WOLF", "STONE", "QUEEN", "TEN", "JACK",
-      "QUEEN_CARD", "KING", "ACE", "LEOPARD", "DRAGON",
-      "CROWN", "TEN", "JACK", "QUEEN_CARD", "KING",
-      "ACE", "WOLF", "STONE", "TEN", "JACK",
-      "QUEEN_CARD", "KING", "ACE", "WILD", "TEN",
-      "JACK", "QUEEN_CARD", "KING", "TEN"
-    ]
+    ["Q","K","Stone","A","Q","Leopard","10","A","J","Queen","A","J","Wolf","A","Q","Scatter","J","A","Stone","J","K","A","Wolf","J","Q","K","A","Q","Leopard","J"],
+    ["Q","10","Queen","Q","10","Scatter","K","Q","10","Wolf","Q","Leopard","K","J","10","K","Q","10","Stone","Q","A","J","K","Wolf","J","10","K","A","Leopard","K"],
+    ["10","A","Wolf","10","K","Stone","J","10","Leopard","J","K","A","Leopard","10","A","J","Scatter","Q","A","J","K","10","Stone","K","10","Queen","Q","Wolf","J","K"],
+    ["J","Q","Scatter","A","J","Queen","10","J","Wolf","Q","10","J","K","10","Q","Stone","A","10","K","J","Stone","10","Wolf","Q","A","10","Leopard","J","10","K"],
+    ["J","Stone","10","A","Queen","J","Q","Queen","10","K","Q","Stone","10","Leopard","Q","Scatter","J","A","10","Q","Stone","A","Wolf","K","Leopard","J","A","Wolf","K","A","Leopard","K","10","Wolf","Q","J","A","Wolf","K","10","Wolf","J","Q","Leopard"]
   ],
+  "featureReelStrips": {
+    "Queen": [
+      ["Q","K","Stone","A","Q","Leopard","10","A","J","Queen","A","J","Wolf","A","Q","Scatter","J","A","Stone","J","Q","A","Wolf","J","Q","K","A","Q","Leopard","J"],
+      ["Q","10","Queen","Q","10","Scatter","K","Q","10","Wolf","Q","Leopard","K","J","10","K","Q","10","Stone","Q","A","10","K","Wolf","J","10","K","A","Leopard","K"],
+      ["10","A","Wolf","10","K","Stone","J","10","Leopard","J","K","A","Leopard","10","A","J","Scatter","Q","A","J","K","10","Stone","K","10","Queen","K","Wolf","J","K"],
+      ["J","Q","Scatter","A","J","Queen","10","J","Wolf","Q","10","J","K","10","Q","Stone","A","10","K","J","Stone","10","Wolf","J","A","10","Leopard","J","10","K"],
+      ["J","Stone","10","A","Queen","J","Q","Queen","10","K","Q","Stone","10","Leopard","Q","Scatter","J","A","10","Q","Stone","A","J","K","Leopard","J","A","Wolf","K","A","Leopard","K","10","Wolf","Q","J","A","Wolf","K","10","Wolf","J","Q","Leopard"]
+    ],
+    "Stone": [
+      ["Q","K","Wolf","A","Q","Leopard","10","A","J","Queen","A","J","Wolf","A","Q","Scatter","J","A","Stone","J","Q","A","Wolf","J","Q","K","A","Q","Leopard","J"],
+      ["Q","10","Queen","Q","10","Scatter","K","Q","10","Wolf","Q","K","Stone","J","10","K","Q","10","Stone","Q","A","10","K","Wolf","J","10","K","A","Leopard","K"],
+      ["10","A","Wolf","10","K","Queen","J","10","Leopard","J","K","A","Leopard","10","A","J","Scatter","Q","A","J","K","10","Stone","K","10","Queen","K","Wolf","J","K"],
+      ["J","Q","Scatter","A","J","Queen","10","J","Wolf","Q","10","J","K","10","Q","Queen","A","10","K","J","Stone","10","Wolf","J","A","10","Leopard","J","10","K"],
+      ["J","Stone","10","A","Queen","J","Q","Queen","10","K","Q","Stone","10","Leopard","Q","Scatter","J","A","10","Q","K","A","J","K","Leopard","J","A","Wolf","K","A","Leopard","K","10","Wolf","Q","J","A","Wolf","K","10","Wolf","J","Q","Leopard"]
+    ],
+    "Leopard": [
+      ["Q","K","Stone","A","Q","Leopard","10","A","J","Queen","A","J","Wolf","A","Q","Scatter","J","A","Stone","J","Q","A","Wolf","J","Q","K","A","Q","Leopard","J"],
+      ["Q","10","Queen","Q","10","Scatter","K","Q","10","Wolf","Q","Leopard","K","J","10","K","Q","10","Stone","Q","A","10","K","Wolf","J","10","K","A","Leopard","K"],
+      ["10","A","Wolf","10","K","Stone","J","10","Leopard","J","K","A","Leopard","10","A","J","Scatter","Q","A","J","K","10","Stone","K","10","Queen","K","Wolf","J","K"],
+      ["J","Q","Scatter","A","J","Queen","10","J","Wolf","Q","10","J","K","10","Q","Stone","A","10","K","J","Stone","10","Wolf","J","A","10","Leopard","J","10","K"],
+      ["J","Stone","10","A","Queen","J","Q","Queen","10","K","Q","Stone","10","Leopard","Q","Scatter","J","A","10","Q","Stone","A","Wolf","K","Leopard","J","A","Wolf","K","A","Leopard","K","10","Wolf","Q","J","A","K","J","10","Wolf","J","Q","Leopard"]
+    ],
+    "Wolf": [
+      ["Q","K","Stone","A","Q","Leopard","10","A","J","Queen","A","J","Wolf","A","Q","Scatter","J","A","Stone","J","Q","A","Wolf","J","Q","K","A","Q","Leopard","J"],
+      ["Q","10","Queen","Q","10","Scatter","K","Q","10","Wolf","Q","Leopard","K","J","10","K","Q","10","Stone","Q","A","10","K","Wolf","J","10","K","A","Leopard","K"],
+      ["10","A","Wolf","10","K","Stone","J","10","Leopard","J","K","A","Leopard","10","A","J","Scatter","Q","A","J","K","10","Stone","K","10","Queen","K","Wolf","J","K"],
+      ["J","Q","Scatter","A","J","Queen","10","J","Wolf","Q","10","J","K","10","Q","Stone","A","10","K","J","Stone","10","Wolf","J","A","10","Leopard","J","10","K"],
+      ["J","Stone","10","A","Queen","J","Q","Queen","10","K","Q","Stone","10","Leopard","Q","Scatter","J","A","10","Q","Stone","A","Wolf","K","Leopard","J","A","Wolf","K","A","Leopard","K","10","Wolf","Q","J","A","K","J","10","Wolf","J","Q","Leopard"]
+    ],
+    "A": [
+      ["Q","K","Stone","A","Q","Leopard","10","A","J","Queen","A","J","Wolf","A","Q","Scatter","J","A","Stone","J","Q","A","Wolf","J","Q","K","A","Q","Leopard","J"],
+      ["Q","10","Queen","Q","10","Scatter","K","Q","10","Wolf","Q","Leopard","K","J","10","K","Q","10","Stone","Q","A","10","K","Wolf","J","10","K","A","Leopard","K"],
+      ["10","A","Wolf","10","K","Stone","J","10","Leopard","J","K","A","Leopard","10","A","J","Scatter","Q","A","J","K","10","Stone","K","10","Queen","K","Wolf","J","K"],
+      ["J","Q","Scatter","A","J","Queen","10","J","Wolf","Q","10","J","K","10","Q","Stone","A","10","K","J","Stone","10","Wolf","J","A","10","Leopard","J","10","K"],
+      ["J","Stone","10","A","Queen","J","Q","Queen","10","K","Q","Stone","10","Leopard","Q","Scatter","J","A","10","Q","Stone","A","Wolf","K","Leopard","J","A","Wolf","K","A","Leopard","K","10","Wolf","Q","J","A","K","J","10","Wolf","J","Q","Leopard"]
+    ],
+    "K": [
+      ["Q","K","Stone","A","Q","Leopard","10","A","J","Queen","A","J","Wolf","A","Q","Scatter","J","A","Stone","J","Q","A","Wolf","J","Q","K","A","Q","Leopard","J"],
+      ["Q","10","Queen","Q","10","Scatter","K","Q","10","Wolf","Q","Leopard","K","J","10","K","Q","10","Stone","Q","A","10","K","Wolf","J","10","K","A","Leopard","K"],
+      ["10","A","Wolf","10","K","Stone","J","10","Leopard","J","K","A","Leopard","10","A","J","Scatter","Q","A","J","K","10","Stone","K","10","Queen","K","Wolf","J","K"],
+      ["J","Q","Scatter","A","J","Queen","10","J","Wolf","Q","10","J","K","10","Q","Stone","A","10","K","J","Stone","10","Wolf","J","A","10","Leopard","J","10","K"],
+      ["J","Stone","10","A","Queen","J","Q","Queen","10","K","Q","Stone","10","Leopard","Q","Scatter","J","A","10","Q","Stone","A","Wolf","K","Leopard","J","A","Wolf","K","A","Leopard","K","10","Wolf","Q","J","A","K","J","10","Wolf","J","Q","Leopard"]
+    ],
+    "Q": [
+      ["Q","K","Stone","A","Q","Leopard","10","A","J","Queen","A","J","Wolf","A","Q","Scatter","J","A","Stone","J","Q","A","Wolf","J","Q","K","A","Q","Leopard","J"],
+      ["Q","10","Queen","Q","10","Scatter","K","Q","10","Wolf","Q","Leopard","K","J","10","K","Q","10","Stone","Q","A","10","K","Wolf","J","10","K","A","Leopard","K"],
+      ["10","A","Wolf","10","K","Stone","J","10","Leopard","J","K","A","Leopard","10","A","J","Scatter","Q","A","J","K","10","Stone","K","10","Queen","K","Wolf","J","K"],
+      ["J","Q","Scatter","A","J","Queen","10","J","Wolf","Q","10","J","K","10","Q","Stone","A","10","K","J","Stone","10","Wolf","J","A","10","Leopard","J","10","K"],
+      ["J","Stone","10","A","Queen","J","Q","Queen","10","K","Q","Stone","10","Leopard","Q","Scatter","J","A","10","Q","Stone","A","Wolf","K","Leopard","J","A","Wolf","K","A","Leopard","K","10","Wolf","Q","J","A","K","J","10","Wolf","J","Q","Leopard"]
+    ],
+    "J": [
+      ["Q","K","Stone","A","Q","Leopard","10","A","K","Queen","A","K","Wolf","A","Q","Scatter","J","A","Stone","J","Q","A","Wolf","J","Q","K","A","Q","Leopard","J"],
+      ["Q","10","Queen","Q","10","Scatter","K","Q","10","Wolf","Q","Leopard","K","J","10","K","Q","10","Stone","Q","A","10","K","Wolf","J","10","K","A","Leopard","K"],
+      ["10","A","Wolf","10","K","Stone","Q","10","Leopard","Q","K","A","Leopard","10","A","J","Scatter","Q","A","J","K","10","Stone","K","10","Queen","K","Wolf","Q","K"],
+      ["J","Q","Scatter","A","J","Queen","10","J","Wolf","Q","10","Leopard","K","10","Q","Stone","A","10","Wolf","K","Stone","10","Wolf","K","A","10","Leopard","A","10","K"],
+      ["J","Stone","10","A","Queen","10","Q","Queen","10","K","Q","Stone","10","Leopard","Q","Scatter","J","A","10","Q","Stone","A","Wolf","K","Leopard","Q","A","Wolf","K","A"]
+    ],
+    "10": [
+      ["Q","K","Stone","A","Q","Leopard","10","A","J","Queen","A","J","Wolf","A","Q","Scatter","J","A","Stone","J","Q","A","Wolf","J","Q","K","A","Q","Leopard","J"],
+      ["Q","10","Queen","Q","10","Scatter","K","Q","A","Wolf","Q","Leopard","K","J","10","K","Q","J","Stone","Q","A","J","K","Wolf","J","Stone","K","A","Leopard","K"],
+      ["10","A","Wolf","J","K","Stone","Q","J","Leopard","Q","K","A","Leopard","10","A","J","Scatter","Q","A","J","K","10","Stone","K","J","Queen","K","Wolf","Q","K"],
+      ["J","Q","Scatter","A","J","Queen","10","J","Wolf","Q","10","J","K","J","Q","Stone","A","10","Wolf","K","Stone","J","Wolf","K","A","J","Leopard","A","Q","K"],
+      ["J","Stone","10","A","Queen","K","Q","Queen","J","K","Q","Stone","J","Leopard","Q","Scatter","J","A","10","Q","Stone","A","Wolf","K","Leopard","Q","A","Wolf","K","A"]
+    ]
+  },
   "paylines": [
-    [0, 0, 0, 0, 0, 0],
-    [1, 1, 1, 1, 1, 1],
-    [2, 2, 2, 2, 2, 2],
-    [3, 3, 3, 3, 3, 3],
-    [1, 0, 0, 0, 0, 1],
-    [2, 3, 3, 3, 3, 2],
-    [2, 1, 2, 1, 2, 1],
-    [1, 2, 1, 2, 1, 2],
-    [0, 1, 0, 1, 0, 1],
-    [3, 2, 3, 2, 3, 2]
-  ]
+    [0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1],
+    [2, 2, 2, 2, 2],
+    [0, 1, 2, 1, 0],
+    [2, 1, 0, 1, 2]
+  ],
+  "actionGameWheel": {
+    "6spins": 1,
+    "0": 3,
+    "R10": 8
+  }
 }
-

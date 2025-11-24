@@ -650,15 +650,25 @@ public class GameEngine
         };
     }
 
-    public List<List<string>> GenerateGrid()
+    public List<List<string>> GenerateGrid(string? activeFeatureSymbol = null)
     {
         var grid = new List<List<string>>();
         var scatterSymbol = _config.GetScatterSymbol();
 
+        // Determine which reel strips to use
+        // If we are in free spins with an active expanding symbol, try to use the specific strips for that symbol
+        var stripsToUse = _config.ReelStrips;
+        if (!string.IsNullOrEmpty(activeFeatureSymbol) && 
+            _config.FeatureReelStrips != null && 
+            _config.FeatureReelStrips.TryGetValue(activeFeatureSymbol, out var featureStrips))
+        {
+            stripsToUse = featureStrips;
+        }
+
         for (int reelIndex = 0; reelIndex < _config.NumReels; reelIndex++)
         {
             var reel = new List<string>();
-            var strip = _config.ReelStrips[reelIndex];
+            var strip = stripsToUse[reelIndex];
             var finalStopIndex = _random.Next(strip.Count);
 
             for (int rowIndex = 0; rowIndex < _config.NumRows; rowIndex++)

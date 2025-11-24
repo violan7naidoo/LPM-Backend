@@ -204,8 +204,16 @@ app.MapPost("/play", async (PlayRequest request, GameConfigService configService
             featureSymbol = gameEngine.SelectFeatureSymbol();
         }
 
+        // Determine if we are in a feature game
+        string? activeFeatureSymbol = null;
+        // Logic: If free spins are active, grab the feature symbol from the stored state
+        if (isFreeSpin && !string.IsNullOrEmpty(featureSymbol))
+        {
+            activeFeatureSymbol = featureSymbol;
+        }
+
         // Generate new grid
-        var grid = gameEngine.GenerateGrid();
+        var grid = gameEngine.GenerateGrid(activeFeatureSymbol);
 
         // Evaluate the spin
         // Note: betAmount parameter is per-payline for legacy compatibility, but totalBet is used for bet-specific payout lookup

@@ -20,6 +20,10 @@ public class GameConfig
     public Dictionary<string, int> ActionGameWheel { get; set; } = new(); // Key: "0", "R10", "6spins", Value: probability weight
     
     public List<List<string>> ReelStrips { get; set; } = new();
+    
+    [System.Text.Json.Serialization.JsonPropertyName("featureReelStrips")]
+    public Dictionary<string, List<List<string>>> FeatureReelStrips { get; set; } = new();
+    
     public List<List<int>> Paylines { get; set; } = new();
     // Legacy: simple multiplier-based scatter payout (for backward compatibility)
     public Dictionary<int, decimal> ScatterPayout { get; set; } = new();
