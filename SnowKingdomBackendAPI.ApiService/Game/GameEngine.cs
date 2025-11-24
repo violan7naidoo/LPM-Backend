@@ -29,7 +29,6 @@ public class GameEngine
 
         // In free spins: evaluate base game first, then feature game after expansion
         var expandedGrid = grid;
-        var hasFeatureSymbol = false;
         // Store feature symbol info for later expansion check
         var featureSymbolCount = 0;
         HashSet<int>? reelsWithFeature = null;
@@ -360,7 +359,6 @@ public class GameEngine
         {
             // Now expand the reels (AFTER base game wins have been calculated)
             expandedGrid = ExpandFeatureSymbol(grid, featureSymbol, reelsWithFeature);
-            hasFeatureSymbol = true;
             
             Console.WriteLine($"[FREE SPINS] Feature symbol expansion triggered: {featureSymbolCount} reels have {featureSymbol}");
             result.ExpandedSymbols = GetExpandedPositions(grid, expandedGrid, featureSymbol);
@@ -534,11 +532,6 @@ public class GameEngine
 
     private void CheckActionGameTriggers(List<List<string>> grid, decimal betAmount, SpinResult result)
     {
-        if (_config.ActionGameTriggers == null || _config.ActionGameTriggers.Count == 0)
-        {
-            return;
-        }
-
         // Count symbols in grid
         var symbolCounts = new Dictionary<string, int>();
         foreach (var reel in grid)
@@ -553,16 +546,61 @@ public class GameEngine
             }
         }
 
-        // Check each action game trigger
-        foreach (var trigger in _config.ActionGameTriggers.Values)
+        // Normalize bet amount to match config keys (e.g., "5.00")
+        var betKey = betAmount.ToString("F2");
+        
+        // Check symbol-specific action games (bet-specific configuration)
+        if (_config.Symbols != null)
         {
-            if (symbolCounts.TryGetValue(trigger.Symbol, out var count) && count >= trigger.Count)
+            foreach (var symbolEntry in _config.Symbols)
             {
-                result.ActionGameTriggered = true;
-                result.ActionGameSpins = trigger.ActionSpins;
-                result.ActionGameWin = trigger.BaseWin * betAmount;
-                result.TotalWin += result.ActionGameWin;
-                break; // Only trigger one action game per spin
+                var symbolName = symbolEntry.Key;
+                var symbolConfig = symbolEntry.Value;
+                
+                // Check if this symbol appears in the grid
+                if (symbolCounts.TryGetValue(symbolName, out var count))
+                {
+                    // Check for bet-specific action games
+                    if (symbolConfig.ActionGamesByBet != null && 
+                        symbolConfig.ActionGamesByBet.TryGetValue(betKey, out var betActionGames))
+                    {
+                        // Find the highest count threshold that this symbol count meets
+                        var matchingCounts = betActionGames.Keys
+                            .Where(c => count >= c)
+                            .OrderByDescending(c => c)
+                            .ToList();
+                        
+                        if (matchingCounts.Count > 0)
+                        {
+                            var highestCount = matchingCounts[0];
+                            if (betActionGames.TryGetValue(highestCount, out var actionSpins) && actionSpins > 0)
+                            {
+                                result.ActionGameTriggered = true;
+                                result.ActionGameSpins = actionSpins;
+                                // Action game win is already calculated in payline evaluation
+                                // We don't add it again here to avoid double-counting
+                                Console.WriteLine($"[ACTION GAME] Triggered: {symbolName} x{count} at bet {betKey} -> {actionSpins} action games");
+                                break; // Only trigger one action game per spin
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Fallback to legacy ActionGameTriggers if no bet-specific triggers found
+        if (!result.ActionGameTriggered && _config.ActionGameTriggers != null && _config.ActionGameTriggers.Count > 0)
+        {
+            foreach (var trigger in _config.ActionGameTriggers.Values)
+            {
+                if (symbolCounts.TryGetValue(trigger.Symbol, out var count) && count >= trigger.Count)
+                {
+                    result.ActionGameTriggered = true;
+                    result.ActionGameSpins = trigger.ActionSpins;
+                    result.ActionGameWin = trigger.BaseWin * betAmount;
+                    result.TotalWin += result.ActionGameWin;
+                    break; // Only trigger one action game per spin
+                }
             }
         }
     }

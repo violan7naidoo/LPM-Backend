@@ -98,7 +98,13 @@ public class SessionService
             LastWin = session.LastWin,
             Results = session.LastResponse?.Results ?? new SpinResult(),
             ActionGameSpins = session.LastResponse?.ActionGameSpins ?? 0,
-            FeatureSymbol = session.LastResponse?.FeatureSymbol ?? ""
+            FeatureSymbol = session.LastResponse?.FeatureSymbol ?? "",
+            AccumulatedActionGameWin = session.LastResponse?.AccumulatedActionGameWin ?? 0,
+            AccumulatedPennyGameBets = session.LastResponse?.AccumulatedPennyGameBets ?? 0,
+            AccumulatedActionGameBets = session.LastResponse?.AccumulatedActionGameBets ?? 0,
+            LosingSpinsAfterFeature = session.LastResponse?.LosingSpinsAfterFeature ?? 0,
+            LastFeatureExitType = session.LastResponse?.LastFeatureExitType,
+            MysteryPrizeTrigger = session.LastResponse?.MysteryPrizeTrigger // Retrieve stored trigger value
         };
     }
 

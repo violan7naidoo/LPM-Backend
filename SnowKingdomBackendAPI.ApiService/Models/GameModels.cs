@@ -100,6 +100,13 @@ public class GameState
     public int ActionGameSpins { get; set; } = 0;
     public string FeatureSymbol { get; set; } = string.Empty;
     public decimal AccumulatedActionGameWin { get; set; } = 0;
+    
+    // Penny games and action games R0.10 deduction tracking
+    public decimal AccumulatedPennyGameBets { get; set; } = 0;
+    public decimal AccumulatedActionGameBets { get; set; } = 0;
+    public int LosingSpinsAfterFeature { get; set; } = 0;
+    public string? LastFeatureExitType { get; set; } = null; // "freeSpins" or "actionGames"
+    public int? MysteryPrizeTrigger { get; set; } = null; // Random trigger value (2-5) set when first reaching 2 losing spins
 }
 
 public class PlayResponse
@@ -112,6 +119,11 @@ public class PlayResponse
     // Book of Ra specific fields
     public int ActionGameSpins { get; set; } = 0;
     public string FeatureSymbol { get; set; } = string.Empty;
+    
+    // Mystery prize fields
+    public decimal MysteryPrizeAwarded { get; set; } = 0;
+    public decimal AccumulatedPennyGameBets { get; set; } = 0;
+    public decimal AccumulatedActionGameBets { get; set; } = 0;
 }
 
 public class ActionGameSpinRequest

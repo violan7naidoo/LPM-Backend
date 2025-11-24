@@ -3,6 +3,7 @@ using SnowKingdomBackendAPI.ApiService.Data;
 using SnowKingdomBackendAPI.ApiService.Game;
 using SnowKingdomBackendAPI.ApiService.Models;
 using SnowKingdomBackendAPI.ApiService.Services;
+using System.Linq;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -227,6 +228,14 @@ app.MapPost("/play", async (PlayRequest request, GameConfigService configService
         var newActionGameSpins = currentState.ActionGameSpins;
         var wasInFreeSpinsMode = currentState.FreeSpinsRemaining > 0;
         var accumulatedActionWin = currentState.AccumulatedActionGameWin;
+        
+        // Track penny game and action game bets
+        var accumulatedPennyGameBets = currentState.AccumulatedPennyGameBets;
+        var accumulatedActionGameBets = currentState.AccumulatedActionGameBets;
+        var losingSpinsAfterFeature = currentState.LosingSpinsAfterFeature;
+        var lastFeatureExitType = currentState.LastFeatureExitType;
+        var mysteryPrizeTrigger = currentState.MysteryPrizeTrigger; // Get stored trigger value
+        const decimal pennyGameBetAmount = 0.10m;
 
         if (isActionGameSpin)
         {
@@ -235,6 +244,22 @@ app.MapPost("/play", async (PlayRequest request, GameConfigService configService
         }
         else if (isFreeSpin)
         {
+            // Check if player has enough balance for R0.10 penny game bet
+            if (currentState.Balance < pennyGameBetAmount)
+            {
+                return Results.BadRequest(new
+                {
+                    Error = "Insufficient balance for penny game spin",
+                    CurrentBalance = currentState.Balance,
+                    Required = pennyGameBetAmount
+                });
+            }
+            
+            // Deduct R0.10 for penny game (free spin)
+            newBalance = currentState.Balance - pennyGameBetAmount;
+            accumulatedPennyGameBets += pennyGameBetAmount;
+            Console.WriteLine($"[PENNY GAME] Deducted R{pennyGameBetAmount} for free spin. Total accumulated: R{accumulatedPennyGameBets}");
+            
             // Using free spin - decrement FIRST before checking for retrigger
             newFreeSpins = Math.Max(0, currentState.FreeSpinsRemaining - 1);
             Console.WriteLine($"[FREE SPINS DEBUG] Decremented free spins: {currentState.FreeSpinsRemaining} -> {newFreeSpins}");
@@ -307,18 +332,120 @@ app.MapPost("/play", async (PlayRequest request, GameConfigService configService
             newActionGameSpins += spinResult.ActionGameSpins;
         }
 
+        // Track when free spins end (transition from > 0 to 0)
+        var freeSpinsJustEnded = wasInFreeSpinsMode && newFreeSpins == 0;
+        if (freeSpinsJustEnded)
+        {
+            lastFeatureExitType = "freeSpins";
+            losingSpinsAfterFeature = 0;
+            mysteryPrizeTrigger = null; // Reset trigger when feature ends
+            Console.WriteLine($"[MYSTERY PRIZE] Free spins ended. Starting mystery prize tracking.");
+        }
+
+        // Track when action games end (if we're in base game and action games just became 0)
+        var actionGamesJustEnded = !isFreeSpin && !isActionGameSpin && currentState.ActionGameSpins > 0 && newActionGameSpins == 0;
+        if (actionGamesJustEnded)
+        {
+            lastFeatureExitType = "actionGames";
+            losingSpinsAfterFeature = 0;
+            mysteryPrizeTrigger = null; // Reset trigger when feature ends
+            Console.WriteLine($"[MYSTERY PRIZE] Action games ended. Starting mystery prize tracking.");
+        }
+
+        // Mystery prize logic - only in base game (not free spins or action game spins)
+        var mysteryPrizeAwarded = 0m;
+        if (!isFreeSpin && !isActionGameSpin && !string.IsNullOrEmpty(lastFeatureExitType))
+        {
+            // Use the totalWin already calculated above (baseWin + ExpandedWin)
+            // This represents the actual win amount added to balance
+            
+            if (totalWin == 0)
+            {
+                // Losing spin - increment counter
+                losingSpinsAfterFeature++;
+                Console.WriteLine($"[MYSTERY PRIZE] Losing spin #{losingSpinsAfterFeature} after {lastFeatureExitType}");
+                
+                // Check if we should award mystery prize (between 2-5 losing spins)
+                if (losingSpinsAfterFeature >= 2)
+                {
+                    // Generate random trigger ONCE when we first reach 2 losing spins
+                    if (mysteryPrizeTrigger == null)
+                    {
+                        var random = new Random();
+                        mysteryPrizeTrigger = random.Next(2, 6); // 2, 3, 4, or 5
+                        Console.WriteLine($"[MYSTERY PRIZE] Generated trigger: {mysteryPrizeTrigger} (will award on losing spin #{mysteryPrizeTrigger})");
+                    }
+                    
+                    // Check if current losing spin count matches the trigger
+                    if (losingSpinsAfterFeature == mysteryPrizeTrigger)
+                    {
+                        // Award mystery prize
+                        var totalAccumulatedBets = accumulatedPennyGameBets + accumulatedActionGameBets;
+                        if (totalAccumulatedBets > 0)
+                        {
+                            mysteryPrizeAwarded = totalAccumulatedBets;
+                            newBalance += mysteryPrizeAwarded;
+                            Console.WriteLine($"[MYSTERY PRIZE] Awarded R{mysteryPrizeAwarded} (Penny: R{accumulatedPennyGameBets}, Action: R{accumulatedActionGameBets})");
+                            
+                            // Update totalWin to include mystery prize for display purposes
+                            // This ensures the win animation shows the correct amount
+                            totalWin = mysteryPrizeAwarded;
+                            
+                            // Reset pools and tracking
+                            accumulatedPennyGameBets = 0;
+                            accumulatedActionGameBets = 0;
+                            losingSpinsAfterFeature = 0;
+                            lastFeatureExitType = null;
+                            mysteryPrizeTrigger = null; // Reset trigger after awarding
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Winning spin - reset losing spin counter and trigger but KEEP accumulated bets and lastFeatureExitType
+                // This allows mystery prize to still be awarded if more losing spins occur
+                // Only reset everything when mystery prize is actually awarded
+                losingSpinsAfterFeature = 0;
+                mysteryPrizeTrigger = null; // Reset trigger on winning spin (will be regenerated on next losing spin)
+                var totalPending = accumulatedPennyGameBets + accumulatedActionGameBets;
+                if (totalPending > 0)
+                {
+                    Console.WriteLine($"[MYSTERY PRIZE] Winning spin - resetting losing spin counter and trigger (accumulated bets: R{totalPending} still pending, will continue tracking)");
+                }
+                else
+                {
+                    // No accumulated bets, safe to reset everything
+                    lastFeatureExitType = null;
+                    Console.WriteLine($"[MYSTERY PRIZE] Winning spin - no accumulated bets, resetting all tracking");
+                }
+            }
+        }
+
         // Update session state
         // When retriggering free spins, keep the existing feature symbol
         var finalFeatureSymbol = selectedFeatureSymbol ?? featureSymbol ?? "";
+        
+        // Update spinResult.TotalWin if mystery prize was awarded (for display purposes)
+        if (mysteryPrizeAwarded > 0)
+        {
+            spinResult.TotalWin = mysteryPrizeAwarded;
+        }
+        
         var newState = new GameState
         {
             Balance = newBalance,
             FreeSpinsRemaining = newFreeSpins,
-            LastWin = spinResult.TotalWin + spinResult.ExpandedWin,
+            LastWin = mysteryPrizeAwarded > 0 ? mysteryPrizeAwarded : (spinResult.TotalWin + spinResult.ExpandedWin),
             Results = spinResult,
             ActionGameSpins = newActionGameSpins,
             FeatureSymbol = finalFeatureSymbol,
-            AccumulatedActionGameWin = accumulatedActionWin
+            AccumulatedActionGameWin = accumulatedActionWin,
+            AccumulatedPennyGameBets = accumulatedPennyGameBets,
+            AccumulatedActionGameBets = accumulatedActionGameBets,
+            LosingSpinsAfterFeature = losingSpinsAfterFeature,
+            LastFeatureExitType = lastFeatureExitType,
+            MysteryPrizeTrigger = mysteryPrizeTrigger // Store the trigger value
         };
         
         // Update spinResult with the final feature symbol
@@ -354,7 +481,10 @@ app.MapPost("/play", async (PlayRequest request, GameConfigService configService
             Game = newState,
             FreeSpins = newFreeSpins,
             ActionGameSpins = newActionGameSpins,
-            FeatureSymbol = newState.FeatureSymbol
+            FeatureSymbol = newState.FeatureSymbol,
+            MysteryPrizeAwarded = mysteryPrizeAwarded,
+            AccumulatedPennyGameBets = accumulatedPennyGameBets,
+            AccumulatedActionGameBets = accumulatedActionGameBets
         };
 
         // Attempt to send to RGS (non-blocking, fire-and-forget)
@@ -470,28 +600,67 @@ app.MapPost("/action-game/spin", async (ActionGameSpinRequest request, GameConfi
             return Results.BadRequest(new { Error = "No action game spins remaining" });
         }
 
+        // Check if player has enough balance for R0.10 action game bet
+        const decimal actionGameBetAmount = 0.10m;
+        if (session.Balance < actionGameBetAmount)
+        {
+            return Results.BadRequest(new
+            {
+                Error = "Insufficient balance for action game spin",
+                CurrentBalance = session.Balance,
+                Required = actionGameBetAmount
+            });
+        }
+
         // Get game config
         var gameId = session.GameId ?? "SnowKingdom";
         var gameConfig = configService.LoadGameConfig(gameId);
         var gameEngine = new GameEngine(gameConfig);
 
+        // Deduct R0.10 for action game spin
+        var currentBalance = session.Balance;
+        var balanceAfterDeduction = currentBalance - actionGameBetAmount;
+        var accumulatedActionGameBets = (session.LastResponse?.AccumulatedActionGameBets ?? 0) + actionGameBetAmount;
+        Console.WriteLine($"[ACTION GAME] Deducted R{actionGameBetAmount} for action game spin. Total accumulated: R{accumulatedActionGameBets}");
+
         // Spin the wheel
         var wheelResult = gameEngine.SpinActionGameWheel();
 
         // Add wheel win to balance immediately after each spin
-        // Use session.Balance (from database) instead of currentState.Balance (from cache) to ensure we have the latest balance
-        var currentBalance = session.Balance;
-        var newBalance = currentBalance + wheelResult.Win;
-        Console.WriteLine($"[ACTION GAME] Current balance: R{currentBalance}, Wheel win: R{wheelResult.Win}, New balance: R{newBalance}");
+        var newBalance = balanceAfterDeduction + wheelResult.Win;
+        Console.WriteLine($"[ACTION GAME] Current balance: R{currentBalance}, Deducted: R{actionGameBetAmount}, Wheel win: R{wheelResult.Win}, New balance: R{newBalance}");
 
         // Update action game spins (deduct 1, add any additional spins)
         var newActionGameSpins = currentState.ActionGameSpins - 1 + wheelResult.AdditionalSpins;
+        
+        // Track when action games end (transition from > 0 to 0)
+        var actionGamesJustEnded = currentState.ActionGameSpins > 0 && newActionGameSpins == 0;
+        var losingSpinsAfterFeature = 0;
+        string? lastFeatureExitType = null;
+        int? mysteryPrizeTrigger = null;
+        if (actionGamesJustEnded)
+        {
+            lastFeatureExitType = "actionGames";
+            losingSpinsAfterFeature = 0;
+            mysteryPrizeTrigger = null; // Reset trigger when feature ends
+            Console.WriteLine($"[MYSTERY PRIZE] Action games ended. Starting mystery prize tracking.");
+        }
+        else
+        {
+            // Preserve existing mystery prize tracking state
+            losingSpinsAfterFeature = currentState.LosingSpinsAfterFeature;
+            lastFeatureExitType = currentState.LastFeatureExitType;
+            mysteryPrizeTrigger = currentState.MysteryPrizeTrigger; // Preserve trigger
+        }
 
         // Load accumulated win from database session (LastResponse) to ensure we have the latest value
         // This is critical for accumulating wins across multiple action game sessions
         var currentAccumulatedWin = session.LastResponse?.AccumulatedActionGameWin ?? 0;
         var accumulatedWin = currentAccumulatedWin + wheelResult.Win;
         Console.WriteLine($"[ACTION GAME] Current accumulated win: R{currentAccumulatedWin}, Wheel win: R{wheelResult.Win}, New accumulated win: R{accumulatedWin}");
+
+        // Preserve penny game bets
+        var accumulatedPennyGameBets = currentState.AccumulatedPennyGameBets;
 
         // Update session state
         var newState = new GameState
@@ -502,7 +671,12 @@ app.MapPost("/action-game/spin", async (ActionGameSpinRequest request, GameConfi
             Results = currentState.Results,
             ActionGameSpins = newActionGameSpins,
             FeatureSymbol = currentState.FeatureSymbol,
-            AccumulatedActionGameWin = accumulatedWin
+            AccumulatedActionGameWin = accumulatedWin,
+            AccumulatedPennyGameBets = accumulatedPennyGameBets,
+            AccumulatedActionGameBets = accumulatedActionGameBets,
+            LosingSpinsAfterFeature = losingSpinsAfterFeature,
+            LastFeatureExitType = lastFeatureExitType,
+            MysteryPrizeTrigger = mysteryPrizeTrigger // Preserve or reset trigger
         };
 
         // Update session state (this updates both in-memory cache and database)
@@ -556,9 +730,524 @@ using (var scope = app.Services.CreateScope())
     await dbContext.Database.EnsureCreatedAsync();
 }
 
+// Dev mode endpoint: Force trigger free spins (only in development)
+if (app.Environment.IsDevelopment())
+{
+    app.MapPost("/dev/trigger-free-spins", async (DevTriggerFreeSpinsRequest request, GameConfigService configService, SessionService sessionService, GameDataService dataService, OptionalRgsService? optionalRgsService) =>
+    {
+        try
+        {
+            // Get or create session
+            var currentState = sessionService.GetOrCreateSession(request.SessionId);
+            var session = await sessionService.GetSessionAsync(request.SessionId);
+            
+            if (session == null)
+            {
+                return Results.BadRequest(new { Error = "Session not found" });
+            }
+
+            // Get gameId
+            var gameId = request.GameId ?? session.GameId ?? "SnowKingdom";
+            
+            // Load game configuration
+            var gameConfig = configService.LoadGameConfig(gameId);
+            var gameEngine = new GameEngine(gameConfig);
+            
+            var scatterSymbol = gameConfig.GetScatterSymbol();
+            var reelStrips = gameConfig.ReelStrips;
+            var numReels = reelStrips.Count;
+            var numRows = reelStrips[0]?.Count > 0 ? reelStrips[0].Count : 3;
+
+            // Force generate a grid with 3+ scatter symbols on different reels
+            var forcedGrid = new List<List<string>>();
+            var scatterPositions = new List<(int reel, int row)>();
+            
+            // Place scatter symbols on reels 0, 1, and 2 (guaranteed 3 scatters)
+            for (int reel = 0; reel < Math.Min(3, numReels); reel++)
+            {
+                var reelStrip = reelStrips[reel] ?? new List<string>();
+                var reelColumn = new List<string>();
+                
+                for (int row = 0; row < numRows; row++)
+                {
+                    if (row == 1) // Place scatter in middle row
+                    {
+                        reelColumn.Add(scatterSymbol);
+                        scatterPositions.Add((reel, row));
+                    }
+                    else
+                    {
+                        // Get random symbol from reel strip (excluding scatter to avoid consecutive)
+                        var availableSymbols = reelStrip.Where(s => s != scatterSymbol).ToList();
+                        if (availableSymbols.Count == 0) availableSymbols = reelStrip.ToList();
+                        var randomSymbol = availableSymbols[new Random().Next(availableSymbols.Count)];
+                        reelColumn.Add(randomSymbol);
+                    }
+                }
+                forcedGrid.Add(reelColumn);
+            }
+            
+            // Fill remaining reels with random symbols
+            for (int reel = 3; reel < numReels; reel++)
+            {
+                var reelStrip = reelStrips[reel] ?? new List<string>();
+                var reelColumn = new List<string>();
+                
+                for (int row = 0; row < numRows; row++)
+                {
+                    var randomSymbol = reelStrip[new Random().Next(reelStrip.Count)];
+                    reelColumn.Add(randomSymbol);
+                }
+                forcedGrid.Add(reelColumn);
+            }
+
+            // Now process this grid through normal play logic
+            // We'll create a play request and process it
+            var isFreeSpin = currentState.FreeSpinsRemaining > 0;
+            var totalBet = request.BetAmount > 0 
+                ? request.BetAmount 
+                : (request.NumPaylines > 0 && request.BetPerPayline > 0
+                    ? request.NumPaylines * request.BetPerPayline
+                    : 1.00m);
+            var numPaylines = request.NumPaylines > 0 ? request.NumPaylines : gameConfig.MaxPaylines;
+            var betPerPayline = totalBet / numPaylines;
+            
+            // Get feature symbol if in free spins
+            string? featureSymbol = null;
+            if (isFreeSpin && !string.IsNullOrEmpty(currentState.FeatureSymbol))
+            {
+                featureSymbol = currentState.FeatureSymbol;
+            }
+
+            // Evaluate the forced spin
+            var spinResult = gameEngine.EvaluateSpin(forcedGrid, betPerPayline, numPaylines, isFreeSpin, featureSymbol, totalBet);
+            
+            // Process the result through normal play logic (balance updates, free spins, etc.)
+            // Calculate wins - baseWin starts as TotalWin, then adjusted
+            var baseWin = spinResult.TotalWin;
+            var accumulatedActionWin = currentState.AccumulatedActionGameWin;
+            
+            // Handle action game wins during free spins
+            if (isFreeSpin && spinResult.ActionGameTriggered)
+            {
+                accumulatedActionWin += spinResult.ActionGameWin;
+                baseWin -= spinResult.ActionGameWin;
+            }
+            else if (!isFreeSpin && spinResult.ActionGameTriggered)
+            {
+                baseWin += spinResult.ActionGameWin;
+            }
+            
+            var totalWin = baseWin + spinResult.ExpandedWin;
+            
+            // Update balance
+            var newBalance = session.Balance;
+            if (!isFreeSpin)
+            {
+                newBalance = newBalance - totalBet + totalWin;
+            }
+            else
+            {
+                // During free spins, deduct R0.10 and add to accumulated bets
+                const decimal pennyGameBetAmount = 0.10m;
+                newBalance = newBalance - pennyGameBetAmount + totalWin;
+                currentState.AccumulatedPennyGameBets = currentState.AccumulatedPennyGameBets + pennyGameBetAmount;
+            }
+            
+            // Add free spins if triggered
+            var newFreeSpins = currentState.FreeSpinsRemaining;
+            string? selectedFeatureSymbol = null;
+            if (spinResult.ScatterWin.TriggeredFreeSpins)
+            {
+                var freeSpinsAwarded = gameConfig.FreeSpinsAwarded;
+                newFreeSpins += freeSpinsAwarded;
+                
+                if (!isFreeSpin)
+                {
+                    selectedFeatureSymbol = gameEngine.SelectFeatureSymbol();
+                    spinResult.FeatureSymbol = selectedFeatureSymbol;
+                }
+            }
+            
+            // Update state
+            currentState.Balance = newBalance;
+            currentState.FreeSpinsRemaining = newFreeSpins;
+            if (!string.IsNullOrEmpty(selectedFeatureSymbol))
+            {
+                currentState.FeatureSymbol = selectedFeatureSymbol;
+            }
+            currentState.LastWin = totalWin;
+            
+            // Track free spins ending
+            var wasInFreeSpinsMode = currentState.FreeSpinsRemaining > 0;
+            var freeSpinsJustEnded = wasInFreeSpinsMode && newFreeSpins == 0;
+            if (freeSpinsJustEnded)
+            {
+                currentState.LastFeatureExitType = "freeSpins";
+                currentState.LosingSpinsAfterFeature = 0;
+                currentState.MysteryPrizeTrigger = null; // Reset trigger when feature ends
+                Console.WriteLine($"[MYSTERY PRIZE] Free spins ended. Starting mystery prize tracking.");
+            }
+            
+            // Track action games ending
+            var wasInActionGamesMode = currentState.ActionGameSpins > 0;
+            var actionGamesJustEnded = wasInActionGamesMode && currentState.ActionGameSpins == 0;
+            if (actionGamesJustEnded && !isFreeSpin)
+            {
+                currentState.LastFeatureExitType = "actionGames";
+                currentState.LosingSpinsAfterFeature = 0;
+                currentState.MysteryPrizeTrigger = null; // Reset trigger when feature ends
+                Console.WriteLine($"[MYSTERY PRIZE] Action games ended. Starting mystery prize tracking.");
+            }
+            
+            // Mystery prize logic - only in base game (not free spins or action game spins)
+            var mysteryPrizeAwarded = 0m;
+            var accumulatedPennyGameBets = currentState.AccumulatedPennyGameBets;
+            var accumulatedActionGameBets = currentState.AccumulatedActionGameBets;
+            var losingSpinsAfterFeature = currentState.LosingSpinsAfterFeature;
+            var lastFeatureExitType = currentState.LastFeatureExitType;
+            var mysteryPrizeTrigger = currentState.MysteryPrizeTrigger; // Get stored trigger value
+            
+            if (!isFreeSpin && !string.IsNullOrEmpty(lastFeatureExitType))
+            {
+                if (totalWin == 0)
+                {
+                    // Losing spin - increment counter
+                    losingSpinsAfterFeature++;
+                    Console.WriteLine($"[MYSTERY PRIZE] Losing spin #{losingSpinsAfterFeature} after {lastFeatureExitType}");
+                    
+                    // Check if we should award mystery prize (between 2-5 losing spins)
+                    if (losingSpinsAfterFeature >= 2)
+                    {
+                        // Generate random trigger ONCE when we first reach 2 losing spins
+                        if (mysteryPrizeTrigger == null)
+                        {
+                            var random = new Random();
+                            mysteryPrizeTrigger = random.Next(2, 6); // 2, 3, 4, or 5
+                            Console.WriteLine($"[MYSTERY PRIZE] Generated trigger: {mysteryPrizeTrigger} (will award on losing spin #{mysteryPrizeTrigger})");
+                        }
+                        
+                        // Check if current losing spin count matches the trigger
+                        if (losingSpinsAfterFeature == mysteryPrizeTrigger)
+                        {
+                            // Award mystery prize
+                            var totalAccumulatedBets = accumulatedPennyGameBets + accumulatedActionGameBets;
+                            if (totalAccumulatedBets > 0)
+                            {
+                                mysteryPrizeAwarded = totalAccumulatedBets;
+                                newBalance += mysteryPrizeAwarded;
+                                Console.WriteLine($"[MYSTERY PRIZE] Awarded R{mysteryPrizeAwarded} (Penny: R{accumulatedPennyGameBets}, Action: R{accumulatedActionGameBets})");
+                                
+                                // Update totalWin to include mystery prize for display purposes
+                                // This ensures the win animation shows the correct amount
+                                totalWin = mysteryPrizeAwarded;
+                                
+                                // Reset pools and tracking
+                                accumulatedPennyGameBets = 0;
+                                accumulatedActionGameBets = 0;
+                                losingSpinsAfterFeature = 0;
+                                lastFeatureExitType = null;
+                                mysteryPrizeTrigger = null; // Reset trigger after awarding
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // Winning spin - reset losing spin counter and trigger but KEEP accumulated bets and lastFeatureExitType
+                    losingSpinsAfterFeature = 0;
+                    mysteryPrizeTrigger = null; // Reset trigger on winning spin (will be regenerated on next losing spin)
+                    var totalPending = accumulatedPennyGameBets + accumulatedActionGameBets;
+                    if (totalPending > 0)
+                    {
+                        Console.WriteLine($"[MYSTERY PRIZE] Winning spin - resetting losing spin counter and trigger (accumulated bets: R{totalPending} still pending, will continue tracking)");
+                    }
+                    else
+                    {
+                        // No accumulated bets, safe to reset everything
+                        lastFeatureExitType = null;
+                        Console.WriteLine($"[MYSTERY PRIZE] Winning spin - no accumulated bets, resetting all tracking");
+                    }
+                }
+            }
+            
+            // Update state with mystery prize tracking
+            currentState.AccumulatedPennyGameBets = accumulatedPennyGameBets;
+            currentState.AccumulatedActionGameBets = accumulatedActionGameBets;
+            currentState.LosingSpinsAfterFeature = losingSpinsAfterFeature;
+            currentState.LastFeatureExitType = lastFeatureExitType;
+            currentState.MysteryPrizeTrigger = mysteryPrizeTrigger; // Store trigger value
+            
+            // Update session
+            session.Balance = newBalance;
+            session.FreeSpinsRemaining = newFreeSpins;
+            session.LastWin = totalWin;
+            
+            // Update LastResponse with new state (which includes FeatureSymbol)
+            if (session.LastResponse == null)
+            {
+                session.LastResponse = new GameState();
+            }
+            session.LastResponse.Balance = newBalance;
+            session.LastResponse.FreeSpinsRemaining = newFreeSpins;
+            session.LastResponse.LastWin = totalWin;
+            session.LastResponse.Results = spinResult;
+            if (!string.IsNullOrEmpty(selectedFeatureSymbol))
+            {
+                session.LastResponse.FeatureSymbol = selectedFeatureSymbol;
+            }
+            session.LastResponse.AccumulatedActionGameWin = accumulatedActionWin;
+            session.LastResponse.AccumulatedPennyGameBets = accumulatedPennyGameBets;
+            session.LastResponse.AccumulatedActionGameBets = accumulatedActionGameBets;
+            session.LastResponse.LosingSpinsAfterFeature = losingSpinsAfterFeature;
+            session.LastResponse.LastFeatureExitType = lastFeatureExitType;
+            
+            await sessionService.UpdateSessionAsync(session);
+            
+            // Update session service state
+            sessionService.UpdateSession(request.SessionId, currentState);
+            
+            // Update spinResult with final values
+            spinResult.TotalWin = totalWin;
+            if (!string.IsNullOrEmpty(selectedFeatureSymbol))
+            {
+                spinResult.FeatureSymbol = selectedFeatureSymbol;
+            }
+            
+            // Build response matching PlayResponse structure
+            var newState = new GameState
+            {
+                Balance = newBalance,
+                FreeSpinsRemaining = newFreeSpins,
+                LastWin = totalWin,
+                Results = spinResult,
+                ActionGameSpins = currentState.ActionGameSpins,
+                FeatureSymbol = selectedFeatureSymbol ?? currentState.FeatureSymbol ?? "",
+                AccumulatedActionGameWin = accumulatedActionWin,
+                AccumulatedPennyGameBets = accumulatedPennyGameBets,
+                AccumulatedActionGameBets = accumulatedActionGameBets,
+                LosingSpinsAfterFeature = losingSpinsAfterFeature,
+                LastFeatureExitType = lastFeatureExitType,
+                MysteryPrizeTrigger = mysteryPrizeTrigger // Store the trigger value
+            };
+            
+            var response = new PlayResponse
+            {
+                SessionId = request.SessionId,
+                Player = newState,
+                Game = newState,
+                FreeSpins = newFreeSpins,
+                ActionGameSpins = currentState.ActionGameSpins,
+                FeatureSymbol = selectedFeatureSymbol ?? currentState.FeatureSymbol ?? "",
+                MysteryPrizeAwarded = mysteryPrizeAwarded,
+                AccumulatedPennyGameBets = accumulatedPennyGameBets,
+                AccumulatedActionGameBets = accumulatedActionGameBets
+            };
+            
+            return Results.Ok(response);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DEV MODE] Error triggering free spins: {ex.Message}");
+            return Results.Problem($"Error: {ex.Message}");
+        }
+    });
+
+    // Dev mode endpoint: Force trigger action games (only in development)
+    app.MapPost("/dev/trigger-action-games", async (DevTriggerActionGamesRequest request, GameConfigService configService, SessionService sessionService, GameDataService dataService, OptionalRgsService? optionalRgsService) =>
+    {
+        try
+        {
+            // Get or create session
+            var currentState = sessionService.GetOrCreateSession(request.SessionId);
+            var session = await sessionService.GetSessionAsync(request.SessionId);
+            
+            if (session == null)
+            {
+                return Results.BadRequest(new { Error = "Session not found" });
+            }
+
+            // Get gameId
+            var gameId = request.GameId ?? session.GameId ?? "SnowKingdom";
+            var gameConfig = configService.LoadGameConfig(gameId);
+            var gameEngine = new GameEngine(gameConfig);
+
+            // Calculate total bet
+            var totalBet = request.BetAmount > 0 ? request.BetAmount : (request.NumPaylines > 0 && request.BetPerPayline > 0 ? request.NumPaylines * request.BetPerPayline : 1.00m);
+            
+            // Normalize to configured bet amount
+            var normalizedBet = gameConfig.BetAmounts.OrderBy(b => Math.Abs(b - totalBet)).First();
+            totalBet = normalizedBet;
+
+            // Generate a grid that will trigger action games
+            // We'll force a grid with enough symbols to trigger action games
+            var grid = new List<List<string>>();
+            var numReels = gameConfig.NumReels;
+            var numRows = gameConfig.NumRows;
+            
+            // Find a symbol that triggers action games
+            string? actionGameSymbol = null;
+            int requiredCount = 0;
+            int actionSpinsAwarded = 10; // Default dev action spins
+            
+            // Look for action game triggers in config
+            if (gameConfig.Symbols != null)
+            {
+                var betKey = totalBet.ToString("F2");
+                foreach (var symbolEntry in gameConfig.Symbols)
+                {
+                    var symbol = symbolEntry.Value;
+                    if (symbol.ActionGamesByBet != null && symbol.ActionGamesByBet.TryGetValue(betKey, out var betActionGames))
+                    {
+                        // Find the highest count that awards action games
+                        foreach (var countEntry in betActionGames.OrderByDescending(x => x.Key))
+                        {
+                            if (countEntry.Value > 0)
+                            {
+                                actionGameSymbol = symbolEntry.Key;
+                                requiredCount = countEntry.Key;
+                                actionSpinsAwarded = countEntry.Value;
+                                break;
+                            }
+                        }
+                        if (actionGameSymbol != null) break;
+                    }
+                }
+            }
+            
+            // If no action game trigger found, use a default symbol (e.g., "Queen")
+            if (actionGameSymbol == null)
+            {
+                actionGameSymbol = "Queen";
+                requiredCount = 5;
+            }
+            
+            // Generate grid with enough symbols to trigger action games
+            // Fill grid with the action game symbol in required positions
+            for (int reel = 0; reel < numReels; reel++)
+            {
+                var reelStrip = new List<string>();
+                for (int row = 0; row < numRows; row++)
+                {
+                    // Place action game symbol in first few positions to ensure trigger
+                    if (reel * numRows + row < requiredCount)
+                    {
+                        reelStrip.Add(actionGameSymbol);
+                    }
+                    else
+                    {
+                        // Fill rest with random symbols
+                        if (gameConfig.Symbols != null && gameConfig.Symbols.Count > 0)
+                        {
+                            var allSymbols = gameConfig.Symbols.Keys.ToList();
+                            reelStrip.Add(allSymbols[new Random().Next(allSymbols.Count)]);
+                        }
+                        else
+                        {
+                            // Fallback if no symbols available
+                            reelStrip.Add("A");
+                        }
+                    }
+                }
+                grid.Add(reelStrip);
+            }
+
+            // Evaluate the spin with the forced grid
+            var numPaylines = request.NumPaylines > 0 ? request.NumPaylines : gameConfig.MaxPaylines;
+            var betPerPayline = request.NumPaylines > 0 && request.BetPerPayline > 0 ? request.BetPerPayline : (totalBet / numPaylines);
+            var spinResult = gameEngine.EvaluateSpin(grid, betPerPayline, numPaylines, false, null, totalBet);
+            
+            // Force action games to be triggered
+            spinResult.ActionGameTriggered = true;
+            spinResult.ActionGameSpins = actionSpinsAwarded;
+            
+            // Calculate base win (excluding action game win)
+            var baseWin = spinResult.TotalWin;
+            
+            // Update balance (deduct bet for base game spin)
+            var newBalance = currentState.Balance - totalBet + baseWin;
+            
+            // Update action game spins
+            var newActionGameSpins = currentState.ActionGameSpins + actionSpinsAwarded;
+            
+            // Track action games starting
+            var losingSpinsAfterFeature = currentState.LosingSpinsAfterFeature;
+            var lastFeatureExitType = currentState.LastFeatureExitType;
+            var mysteryPrizeTrigger = currentState.MysteryPrizeTrigger;
+            
+            // Preserve accumulated values
+            var accumulatedPennyGameBets = currentState.AccumulatedPennyGameBets;
+            var accumulatedActionGameBets = currentState.AccumulatedActionGameBets;
+            var accumulatedActionWin = currentState.AccumulatedActionGameWin;
+            
+            // Update session state
+            var newState = new GameState
+            {
+                Balance = newBalance,
+                FreeSpinsRemaining = currentState.FreeSpinsRemaining,
+                LastWin = baseWin,
+                Results = spinResult,
+                ActionGameSpins = newActionGameSpins,
+                FeatureSymbol = currentState.FeatureSymbol,
+                AccumulatedActionGameWin = accumulatedActionWin,
+                AccumulatedPennyGameBets = accumulatedPennyGameBets,
+                AccumulatedActionGameBets = accumulatedActionGameBets,
+                LosingSpinsAfterFeature = losingSpinsAfterFeature,
+                LastFeatureExitType = lastFeatureExitType,
+                MysteryPrizeTrigger = mysteryPrizeTrigger
+            };
+            
+            // Update session
+            session.Balance = newBalance;
+            session.LastWin = baseWin;
+            if (session.LastResponse == null)
+            {
+                session.LastResponse = new GameState();
+            }
+            session.LastResponse.Balance = newBalance;
+            session.LastResponse.LastWin = baseWin;
+            session.LastResponse.Results = spinResult;
+            session.LastResponse.ActionGameSpins = newActionGameSpins;
+            session.LastResponse.AccumulatedActionGameWin = accumulatedActionWin;
+            session.LastResponse.AccumulatedPennyGameBets = accumulatedPennyGameBets;
+            session.LastResponse.AccumulatedActionGameBets = accumulatedActionGameBets;
+            session.LastResponse.LosingSpinsAfterFeature = losingSpinsAfterFeature;
+            session.LastResponse.LastFeatureExitType = lastFeatureExitType;
+            session.LastResponse.MysteryPrizeTrigger = mysteryPrizeTrigger;
+            
+            await sessionService.UpdateSessionAsync(session);
+            sessionService.UpdateSession(request.SessionId, newState);
+            
+            var response = new PlayResponse
+            {
+                SessionId = request.SessionId,
+                Player = newState,
+                Game = newState,
+                FreeSpins = currentState.FreeSpinsRemaining,
+                ActionGameSpins = newActionGameSpins,
+                FeatureSymbol = currentState.FeatureSymbol ?? "",
+                MysteryPrizeAwarded = 0,
+                AccumulatedPennyGameBets = accumulatedPennyGameBets,
+                AccumulatedActionGameBets = accumulatedActionGameBets
+            };
+            
+            return Results.Ok(response);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DEV MODE] Error triggering action games: {ex.Message}");
+            return Results.Problem($"Error: {ex.Message}");
+        }
+    });
+}
+
 app.MapDefaultEndpoints();
 
 app.Run();
+
+// Dev mode request model
+record DevTriggerFreeSpinsRequest(string SessionId, decimal BetAmount = 0, int NumPaylines = 0, decimal BetPerPayline = 0, string? GameId = null);
+record DevTriggerActionGamesRequest(string SessionId, decimal BetAmount = 0, int NumPaylines = 0, decimal BetPerPayline = 0, string? GameId = null);
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
