@@ -44,6 +44,7 @@ public class ActionGameResult
     public decimal Win { get; set; }
     public int AdditionalSpins { get; set; }
     public string WheelResult { get; set; } = string.Empty;
+    public int SegmentIndex { get; set; } = -1; // 0-11, indicates which specific segment was selected
 }
 
 public class FreeSpinState

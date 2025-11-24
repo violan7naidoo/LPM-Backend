@@ -623,69 +623,77 @@ public class GameEngine
 
     public ActionGameResult SpinActionGameWheel()
     {
-        if (_config.ActionGameWheel == null || _config.ActionGameWheel.Count == 0)
+        // Segment-based weighted selection matching stats table
+        // Segment 0: 6spins (25.000%)
+        // Segments 1, 3, 4, 5, 7, 8, 9, 11: R10 (7.813% each)
+        // Segment 2: NO WIN (4.500%)
+        // Segment 6: NO WIN (4.000%)
+        // Segment 10: NO WIN (4.000%)
+        
+        // Define segment weights (using integer weights for precision)
+        var segmentWeights = new Dictionary<int, int>
         {
-            // Default wheel if not configured
-            return new ActionGameResult
-            {
-                Win = 0,
-                AdditionalSpins = 0,
-                WheelResult = "0"
-            };
-        }
+            { 0, 25000 },   // 6spins - 25.000%
+            { 1, 7813 },    // R10 - 7.813%
+            { 2, 4500 },    // NO WIN - 4.500%
+            { 3, 7813 },    // R10 - 7.813%
+            { 4, 7813 },    // R10 - 7.813%
+            { 5, 7813 },    // R10 - 7.813%
+            { 6, 4000 },    // NO WIN - 4.000%
+            { 7, 7813 },    // R10 - 7.813%
+            { 8, 7813 },    // R10 - 7.813%
+            { 9, 7813 },    // R10 - 7.813%
+            { 10, 4000 },   // NO WIN - 4.000%
+            { 11, 7813 }    // R10 - 7.813%
+        };
 
         // Calculate total weight
-        var totalWeight = _config.ActionGameWheel.Values.Sum();
+        var totalWeight = segmentWeights.Values.Sum();
 
-        if (totalWeight == 0)
-        {
-            return new ActionGameResult
-            {
-                Win = 0,
-                AdditionalSpins = 0,
-                WheelResult = "0"
-            };
-        }
-
-        // Spin the wheel
+        // Spin the wheel - select a segment based on weighted probability
         var randomValue = _random.Next(totalWeight);
         var currentWeight = 0;
+        int selectedSegment = 0;
 
-        foreach (var outcome in _config.ActionGameWheel)
+        foreach (var segment in segmentWeights.OrderBy(s => s.Key))
         {
-            currentWeight += outcome.Value;
+            currentWeight += segment.Value;
             if (randomValue < currentWeight)
             {
-                // Parse the outcome
-                var result = new ActionGameResult
-                {
-                    WheelResult = outcome.Key
-                };
-
-                if (outcome.Key == "R10")
-                {
-                    result.Win = 10.00m;
-                }
-                else if (outcome.Key == "6spins")
-                {
-                    result.AdditionalSpins = 6;
-                }
-                else
-                {
-                    result.Win = 0;
-                }
-
-                return result;
+                selectedSegment = segment.Key;
+                break;
             }
         }
 
-        // Fallback
-        return new ActionGameResult
+        // Map segment to result type and create result
+        var result = new ActionGameResult
         {
-            Win = 0,
-            AdditionalSpins = 0,
-            WheelResult = "0"
+            SegmentIndex = selectedSegment
         };
+
+        if (selectedSegment == 0)
+        {
+            // Segment 0: 6spins
+            result.WheelResult = "6spins";
+            result.AdditionalSpins = 6;
+            result.Win = 0;
+        }
+        else if (selectedSegment == 2 || selectedSegment == 6 || selectedSegment == 10)
+        {
+            // Segments 2, 6, 10: NO WIN
+            result.WheelResult = "0";
+            result.AdditionalSpins = 0;
+            result.Win = 0;
+        }
+        else
+        {
+            // Segments 1, 3, 4, 5, 7, 8, 9, 11: R10
+            result.WheelResult = "R10";
+            result.AdditionalSpins = 0;
+            result.Win = 10.00m;
+        }
+
+        return result;
     }
 
     public List<List<string>> GenerateGrid(string? activeFeatureSymbol = null)
